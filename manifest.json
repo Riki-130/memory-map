@@ -1,0 +1,8 @@
+{
+  "name": "思い出マップ",
+  "short_name": "思い出マップ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb"
+}
