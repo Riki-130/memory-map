@@ -5,9 +5,25 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
-L.marker([35.681236, 139.767125])
-  .addTo(map)
-  .bindPopup("東京駅");
+const PIN_STORAGE_KEY = "memory-map:pins";
+
+function loadPins() {
+  try {
+    const storedPins = JSON.parse(localStorage.getItem(PIN_STORAGE_KEY) || "[]");
+    return Array.isArray(storedPins) ? storedPins : [];
+  } catch (error) {
+    console.warn("Saved pins could not be read.", error);
+    return [];
+  }
+}
+
+function savePins(pins) {
+  try {
+    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pins));
+  } catch (error) {
+    console.warn("Pins could not be saved.", error);
+  }
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -93,9 +109,11 @@ function makeSearchQueries(value) {
 }
 
 let clickPinCount = 0;
+let savedPins = loadPins();
 
-function addRemovablePin(lat, lng, title, zoomAfterMove = false) {
+function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
   const marker = L.marker([Number(lat), Number(lng)]).addTo(map);
+  const id = pinId || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   marker.bindPopup(`
     <strong>${escapeHtml(title)}</strong><br>
@@ -107,6 +125,8 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false) {
 
     button?.addEventListener("click", () => {
       map.removeLayer(marker);
+      savedPins = savedPins.filter((pin) => pin.id !== id);
+      savePins(savedPins);
     });
   });
 
@@ -114,8 +134,16 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false) {
     map.setView([Number(lat), Number(lng)], 16);
   }
 
-  marker.openPopup();
+  if (!pinId) {
+    savedPins.push({ id, lat: Number(lat), lng: Number(lng), title });
+    savePins(savedPins);
+    marker.openPopup();
+  }
 }
+
+savedPins.forEach((pin) => {
+  addRemovablePin(pin.lat, pin.lng, pin.title, false, pin.id);
+});
 
 map.on("click", (event) => {
   clickPinCount += 1;
