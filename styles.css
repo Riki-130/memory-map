@@ -74,10 +74,26 @@ header {
 }
 
 #google-login,
-#copy-login-url,
 #open-login-browser {
   background: #2563eb;
   color: white;
+}
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.auth-actions button {
+  width: 100%;
+}
+
+#copy-login-url {
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .logout-button {

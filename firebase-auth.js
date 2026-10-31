@@ -30,11 +30,14 @@ if (isLineBrowser) {
   loginButton.hidden = true;
   openBrowserButton.hidden = false;
   copyUrlButton.hidden = false;
-  authMessage.textContent = "LINE内ブラウザではGoogleログインできません。右上のメニューから「ブラウザで開く」を選択するか、下のボタンを押してください。";
+  authMessage.textContent = "Googleアカウントでのログインが必要になります。「ブラウザで開く」を選択するか、「ログインURLをコピー」を選択してブラウザに貼り付けてください。";
 }
 
 openBrowserButton.addEventListener("click", () => {
-  window.open(location.href, "_blank", "noopener,noreferrer");
+  const openedWindow = window.open(location.href, "_blank");
+  if (!openedWindow) {
+    authError.textContent = "ブラウザを開けませんでした。「ログインURLをコピー」を押して、Safariのアドレス欄に貼り付けてください。";
+  }
 });
 
 copyUrlButton.addEventListener("click", async () => {
@@ -42,8 +45,21 @@ copyUrlButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(location.href);
     copyUrlButton.textContent = "コピーしました";
   } catch (error) {
-    console.error(error);
-    authError.textContent = "URLをコピーできませんでした。LINEの共有メニューからSafariで開いてください。";
+    const temporaryInput = document.createElement("textarea");
+    temporaryInput.value = location.href;
+    temporaryInput.setAttribute("readonly", "");
+    temporaryInput.style.position = "fixed";
+    temporaryInput.style.opacity = "0";
+    document.body.append(temporaryInput);
+    temporaryInput.select();
+    const copied = document.execCommand("copy");
+    temporaryInput.remove();
+    if (copied) {
+      copyUrlButton.textContent = "コピーしました";
+    } else {
+      console.error(error);
+      authError.textContent = "URLをコピーできませんでした。LINEの共有メニューからSafariで開いてください。";
+    }
   }
 });
 
