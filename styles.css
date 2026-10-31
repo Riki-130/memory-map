@@ -29,9 +29,63 @@ h1 {
 }
 
 header {
+  position: relative;
   height: auto;
   min-height: 56px;
   background: white;
+}
+
+.auth-panel {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 24px;
+  background: rgba(248, 250, 252, 0.96);
+}
+
+.auth-panel.visible {
+  display: grid;
+}
+
+.auth-card {
+  box-sizing: border-box;
+  width: min(360px, 100%);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  background: white;
+  text-align: center;
+}
+
+.auth-card h2 {
+  margin-top: 0;
+}
+
+#google-login,
+.logout-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+#google-login {
+  background: #2563eb;
+  color: white;
+}
+
+.logout-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #e2e8f0;
+}
+
+.auth-error {
+  min-height: 20px;
+  color: #dc2626;
 }
 
 header h1 {

@@ -16,8 +16,18 @@
   >
 </head>
 <body>
+  <div id="auth-loading" class="auth-panel visible">
+    <div class="auth-card">
+      <h2>思い出マップ</h2>
+      <p>Googleアカウントでログインしてください。</p>
+      <button id="google-login" type="button">Googleでログイン</button>
+      <p id="auth-error" class="auth-error" role="alert"></p>
+    </div>
+  </div>
+
   <header>
     <h1>思い出マップ</h1>
+    <button id="google-logout" class="logout-button" type="button">ログアウト</button>
     <form id="address-search">
       <input
         id="address-input"
@@ -38,6 +48,8 @@
     crossorigin="">
   </script>
   <script src="./search-config.js"></script>
+  <script src="./firebase-config.js"></script>
   <script src="./app.js"></script>
+  <script type="module" src="./firebase-auth.js"></script>
 </body>
 </html>
