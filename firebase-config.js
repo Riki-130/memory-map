@@ -1,5 +1,5 @@
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAPpJoJkrfYLR097iLeqxM1XSYVVgqE3IEQ",
+  apiKey: "AIzaSyAPpJokfYLR097iLeqxM1XSYVVgqE3IEQI",
   authDomain: "memory-map-rh130-2026103-eff07.firebaseapp.com",
   projectId: "memory-map-rh130-2026103-eff07",
   storageBucket: "memory-map-rh130-2026103-eff07.firebasestorage.app",
