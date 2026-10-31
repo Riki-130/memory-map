@@ -2,10 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import {
   getAuth,
   GoogleAuthProvider,
-  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
@@ -22,7 +20,6 @@ const authMessage = document.querySelector("#auth-message");
 const copyUrlButton = document.querySelector("#copy-login-url");
 const openBrowserButton = document.querySelector("#open-login-browser");
 
-const isMobileBrowser = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isLineBrowser =
   /Line\//i.test(navigator.userAgent) ||
   /Line/i.test(navigator.userAgent) ||
@@ -55,10 +52,6 @@ loginButton.addEventListener("click", async () => {
   loginButton.disabled = true;
   loginButton.textContent = "ログイン画面を開いています...";
   try {
-    if (isMobileBrowser) {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
     await signInWithPopup(auth, provider);
   } catch (error) {
     console.error(error);
@@ -67,13 +60,6 @@ loginButton.addEventListener("click", async () => {
     loginButton.textContent = "Googleでログイン";
   }
 });
-
-if (!isLineBrowser) {
-  getRedirectResult(auth).catch((error) => {
-    console.error(error);
-    authError.textContent = `ログインに失敗しました: ${error.code}`;
-  });
-}
 
 logoutButton.addEventListener("click", async () => {
   try {
