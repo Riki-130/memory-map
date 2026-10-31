@@ -24,6 +24,10 @@ h1 {
   width: 100%;
 }
 
+.leaflet-popup-content strong {
+  white-space: pre-line;
+}
+
 header {
   height: auto;
   min-height: 56px;

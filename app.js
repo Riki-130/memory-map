@@ -99,8 +99,6 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false) {
 
   marker.bindPopup(`
     <strong>${escapeHtml(title)}</strong><br>
-    緯度: ${Number(lat).toFixed(6)}<br>
-    経度: ${Number(lng).toFixed(6)}<br>
     <button class="delete-pin" type="button">このピンを削除</button>
   `);
 
@@ -253,7 +251,7 @@ function showPlaceCandidates(places, query) {
 
     button.addEventListener("click", () => {
       container.classList.remove("visible");
-      const title = `${place.name}\n${place.address}\nPlace ID: ${place.id}`;
+      const title = `${place.name}\n${place.address}`;
       addRemovablePin(place.lat, place.lng, title, true);
       document.querySelector("#address-input").value = place.name;
     });
