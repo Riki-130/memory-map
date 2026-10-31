@@ -19,6 +19,88 @@ h1 {
 }
 
 #map {
-  height: calc(100vh - 56px);
+  height: calc(100vh - 180px);
+  min-height: 320px;
   width: 100%;
+}
+
+header {
+  height: auto;
+  min-height: 56px;
+  background: white;
+}
+
+header h1 {
+  height: auto;
+}
+
+#address-search {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+#address-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#address-search button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: white;
+}
+
+#search-candidates {
+  display: none;
+  max-height: 220px;
+  margin: 0 16px 12px;
+  overflow-y: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+
+#search-candidates.visible {
+  display: block;
+}
+
+.search-candidate {
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  background: white;
+  text-align: left;
+}
+
+.search-candidate:last-child {
+  border-bottom: 0;
+}
+
+.search-candidate strong,
+.search-candidate span {
+  display: block;
+}
+
+.search-candidate span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.delete-pin {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #dc2626;
+  color: white;
 }

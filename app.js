@@ -200,6 +200,70 @@ function chooseBestPoiResult(results, query) {
   });
 }
 
+async function searchPlaces(query) {
+  const url = window.MEMORY_MAP_CONFIG?.placesSearchUrl;
+  if (!url) {
+    return [];
+  }
+
+  const cacheKey = `places-search:${query}`;
+  try {
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (error) {
+    console.warn("Search cache could not be read.", error);
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Places search failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const places = data.places || [];
+  try {
+    sessionStorage.setItem(cacheKey, JSON.stringify(places));
+  } catch (error) {
+    console.warn("Search cache could not be written.", error);
+  }
+  return places;
+}
+
+function showPlaceCandidates(places, query) {
+  const container = document.querySelector("#search-candidates");
+  container.replaceChildren();
+
+  places.forEach((place) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "search-candidate";
+
+    const name = document.createElement("strong");
+    name.textContent = place.name;
+    const address = document.createElement("span");
+    address.textContent = place.address || `Place ID: ${place.id}`;
+    button.append(name, address);
+
+    button.addEventListener("click", () => {
+      container.classList.remove("visible");
+      const title = `${place.name}\n${place.address}\nPlace ID: ${place.id}`;
+      addRemovablePin(place.lat, place.lng, title, true);
+      document.querySelector("#address-input").value = place.name;
+    });
+
+    container.append(button);
+  });
+
+  container.classList.toggle("visible", places.length > 0);
+}
+
 document.querySelector("#address-search").addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -216,6 +280,14 @@ document.querySelector("#address-search").addEventListener("submit", async (even
 
   try {
     let found = null;
+
+    const places = await searchPlaces(query);
+    if (places.length > 0) {
+      showPlaceCandidates(places, query);
+      return;
+    }
+
+    document.querySelector("#search-candidates").classList.remove("visible");
 
     if (isAddressLike(query)) {
       for (const candidate of makeSearchQueries(query)) {
