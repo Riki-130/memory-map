@@ -65,6 +65,7 @@ header {
 
 #google-login,
 #copy-login-url,
+#open-login-browser,
 .logout-button {
   border: 0;
   border-radius: 8px;
@@ -73,7 +74,8 @@ header {
 }
 
 #google-login,
-#copy-login-url {
+#copy-login-url,
+#open-login-browser {
   background: #2563eb;
   color: white;
 }

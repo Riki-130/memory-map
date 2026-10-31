@@ -20,15 +20,25 @@ const authPanel = document.querySelector("#auth-loading");
 const authError = document.querySelector("#auth-error");
 const authMessage = document.querySelector("#auth-message");
 const copyUrlButton = document.querySelector("#copy-login-url");
+const openBrowserButton = document.querySelector("#open-login-browser");
 
 const isMobileBrowser = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isLineBrowser = /Line\//i.test(navigator.userAgent) || /Line/i.test(navigator.userAgent);
+const isLineBrowser =
+  /Line\//i.test(navigator.userAgent) ||
+  /Line/i.test(navigator.userAgent) ||
+  /line\/|\bLineWebView\b/i.test(document.referrer || "") ||
+  document.referrer.includes("line.me");
 
 if (isLineBrowser) {
   loginButton.hidden = true;
+  openBrowserButton.hidden = false;
   copyUrlButton.hidden = false;
-  authMessage.textContent = "LINE内ブラウザではGoogleログインできません。右上の「ブラウザで開く」または「Safariで開く」を選択してください。";
+  authMessage.textContent = "LINE内ブラウザではGoogleログインできません。右上のメニューから「ブラウザで開く」を選択するか、下のボタンを押してください。";
 }
+
+openBrowserButton.addEventListener("click", () => {
+  window.open(location.href, "_blank", "noopener,noreferrer");
+});
 
 copyUrlButton.addEventListener("click", async () => {
   try {
