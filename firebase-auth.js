@@ -18,8 +18,27 @@ const loginButton = document.querySelector("#google-login");
 const logoutButton = document.querySelector("#google-logout");
 const authPanel = document.querySelector("#auth-loading");
 const authError = document.querySelector("#auth-error");
+const authMessage = document.querySelector("#auth-message");
+const copyUrlButton = document.querySelector("#copy-login-url");
 
 const isMobileBrowser = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isLineBrowser = /Line\//i.test(navigator.userAgent) || /Line/i.test(navigator.userAgent);
+
+if (isLineBrowser) {
+  loginButton.hidden = true;
+  copyUrlButton.hidden = false;
+  authMessage.textContent = "LINE内ブラウザではGoogleログインできません。右上の「ブラウザで開く」または「Safariで開く」を選択してください。";
+}
+
+copyUrlButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    copyUrlButton.textContent = "コピーしました";
+  } catch (error) {
+    console.error(error);
+    authError.textContent = "URLをコピーできませんでした。LINEの共有メニューからSafariで開いてください。";
+  }
+});
 
 loginButton.addEventListener("click", async () => {
   authError.textContent = "";
@@ -39,10 +58,12 @@ loginButton.addEventListener("click", async () => {
   }
 });
 
-getRedirectResult(auth).catch((error) => {
-  console.error(error);
-  authError.textContent = `ログインに失敗しました: ${error.code}`;
-});
+if (!isLineBrowser) {
+  getRedirectResult(auth).catch((error) => {
+    console.error(error);
+    authError.textContent = `ログインに失敗しました: ${error.code}`;
+  });
+}
 
 logoutButton.addEventListener("click", async () => {
   try {
