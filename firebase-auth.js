@@ -2,9 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import {
   getAuth,
   GoogleAuthProvider,
-  getRedirectResult,
   onAuthStateChanged,
-  signInWithRedirect,
+  signInWithPopup,
   signOut
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
@@ -23,7 +22,7 @@ loginButton.addEventListener("click", async () => {
   loginButton.disabled = true;
   loginButton.textContent = "ログイン画面を開いています...";
   try {
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
   } catch (error) {
     console.error(error);
     authError.textContent = `ログインに失敗しました: ${error.code}`;
@@ -38,11 +37,6 @@ logoutButton.addEventListener("click", async () => {
   } catch (error) {
     console.error(error);
   }
-});
-
-getRedirectResult(auth).catch((error) => {
-  console.error(error);
-  authError.textContent = `ログインに失敗しました: ${error.code}`;
 });
 
 onAuthStateChanged(auth, (user) => {
