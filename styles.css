@@ -27,71 +27,71 @@ button, input {
   position: relative;
   z-index: 500;
   box-sizing: border-box;
-  min-height: 142px;
-  padding: 14px 16px 12px;
-  background: linear-gradient(135deg, #fdfcf8 0%, #f1f9f7 100%);
-  border-bottom: 1px solid rgba(15, 11, 8, 0.08);
+  height: 178px;
+  padding: 18px 18px 12px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 142px;
+  gap: 18px;
+  align-items: start;
+  background: var(--paper);
+  border-bottom: 12px solid white;
+  box-shadow: 0 1px 0 rgba(15, 11, 8, 0.08);
 }
 
-.title-wrap {
-  display: flex;
-  justify-content: center;
-  min-height: 70px;
+.title-search-area {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
 }
 
 .brand-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  box-sizing: border-box;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  border: 12px solid #ef3340;
+  border-radius: 12px;
+  background: white;
 }
 
 .brand-title > span {
-  font-family: "Kaushan Script", cursive;
-  font-size: clamp(38px, 5vw, 58px);
-  line-height: 1;
   color: var(--deep-shadow);
-  letter-spacing: 0.02em;
+  font-family: "Kaushan Script", cursive;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.brand-title img {
-  width: 82px;
-  height: 82px;
+.couple-icon {
+  box-sizing: border-box;
+  width: 142px;
+  height: 142px;
   object-fit: contain;
   object-position: center bottom;
-  background: #78bab9;
-  border-radius: 50% 50% 42% 42%;
-  border: 3px solid white;
-  box-shadow: 0 6px 18px rgba(15, 11, 8, 0.18);
+  border: 12px solid #29b48d;
+  border-radius: 12px;
+  background: white;
 }
 
 .menu-open {
-  position: absolute;
-  top: 18px;
-  left: 16px;
-  display: grid;
-  grid-template-columns: repeat(3, 5px);
-  gap: 4px;
-  width: 48px;
+  width: 92px;
+  height: 92px;
   border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--deep-shadow);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffb21a;
   cursor: pointer;
 }
 
 .menu-open span {
-  width: 5px;
+  width: 38px;
   height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.menu-open b {
-  grid-column: 1 / -1;
-  margin-top: 3px;
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  border-radius: 4px;
+  background: #0f0b08;
 }
 
 .app-menu {
@@ -206,7 +206,7 @@ button, input {
 }
 
 #map {
-  height: calc(100vh - 142px);
+  height: calc(100vh - 178px);
   min-height: 320px;
   width: 100%;
 }
@@ -251,27 +251,33 @@ button, input {
 .auth-error { min-height: 20px; color: #dc2626; }
 
 #address-search {
+  height: 58px;
   display: flex;
-  gap: 8px;
-  width: min(760px, calc(100% - 80px));
-  margin: 0 0 0 64px;
+  gap: 0;
+  box-sizing: border-box;
+  border: 12px solid #2f9ee9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
 }
 #address-input {
   flex: 1;
   min-width: 0;
   box-sizing: border-box;
-  padding: 11px 14px;
-  border: 1px solid #bcd4d0;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.92);
+  padding: 6px 12px;
+  border: 0;
+  outline: 0;
+  background: white;
   font-size: 16px;
 }
 #address-search button {
+  flex: 0 0 auto;
   border: 0;
-  border-radius: 999px;
-  padding: 10px 16px;
-  background: var(--ocean-teal);
-  color: white;
+  border-left: 2px solid #2f9ee9;
+  padding: 6px 14px;
+  background: white;
+  color: #17658f;
+  font-weight: 700;
   white-space: nowrap;
 }
 #search-candidates {
@@ -300,11 +306,19 @@ button, input {
 .delete-pin { border: 0; border-radius: 6px; padding: 8px 12px; background: #dc2626; color: white; }
 
 @media (max-width: 640px) {
-  .app-header { min-height: 156px; padding-top: 10px; }
-  .brand-title { gap: 4px; }
-  .brand-title > span { font-size: 34px; }
-  .brand-title img { width: 66px; height: 66px; }
-  #address-search { width: calc(100% - 56px); margin-left: 56px; }
-  #address-search button { padding-inline: 12px; font-size: 13px; }
-  #map { height: calc(100vh - 156px); }
+  .app-header {
+    height: 188px;
+    grid-template-columns: 64px minmax(0, 1fr) 82px;
+    gap: 8px;
+    padding: 10px 8px 8px;
+  }
+  .menu-open { width: 64px; height: 64px; }
+  .menu-open span { width: 27px; height: 4px; }
+  .brand-title { height: 64px; border-width: 7px; }
+  .brand-title > span { font-size: clamp(25px, 8vw, 36px); }
+  .couple-icon { width: 82px; height: 82px; border-width: 7px; }
+  #address-search { height: 54px; border-width: 7px; }
+  #address-search button { padding-inline: 8px; font-size: 12px; }
+  #address-input { padding-inline: 8px; font-size: 14px; }
+  #map { height: calc(100vh - 188px); }
 }

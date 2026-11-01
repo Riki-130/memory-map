@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="./assets/couple-characters.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
   <link
@@ -49,24 +50,23 @@
   <header class="app-header">
     <button id="menu-open" class="menu-open" type="button" aria-label="メニューを開く" aria-expanded="false">
       <span></span><span></span><span></span>
-      <b>MENU</b>
     </button>
-    <div class="title-wrap">
-      <div class="brand-title">
+    <div class="title-search-area">
+      <div class="brand-title" aria-label="Memory Map">
         <span>Memory Map</span>
-        <img src="./assets/couple-characters.png" alt="ふたりのキャラクター">
       </div>
+      <form id="address-search">
+        <input
+          id="address-input"
+          type="search"
+          placeholder="住所や店名を検索"
+          aria-label="住所や店名を検索"
+          required
+        >
+        <button type="submit">ピン検索</button>
+      </form>
     </div>
-    <form id="address-search">
-      <input
-        id="address-input"
-        type="search"
-        placeholder="住所や店名を入力"
-        aria-label="住所や店名"
-        required
-      >
-      <button type="submit">検索して追加</button>
-    </form>
+    <img class="couple-icon" src="./assets/couple-characters.png" alt="ふたりのキャラクター">
     <div id="search-candidates" aria-live="polite"></div>
   </header>
   <div id="map"></div>
@@ -78,7 +78,7 @@
   </script>
   <script src="./search-config.js"></script>
   <script src="./firebase-config.js"></script>
-  <script src="./app.js?v=202611011332"></script>
-  <script type="module" src="./firebase-auth.js?v=202611011332"></script>
+  <script src="./app.js?v=202611011353"></script>
+  <script type="module" src="./firebase-auth.js?v=202611011353"></script>
 </body>
 </html>
