@@ -110,10 +110,58 @@ function makeSearchQueries(value) {
 
 let clickPinCount = 0;
 let savedPins = loadPins();
+let activeList = "memory";
+let markerById = new Map();
+
+function renderPinList() {
+  const container = document.querySelector("#pin-list");
+  if (!container) return;
+
+  container.replaceChildren();
+  const visiblePins = savedPins.filter((pin) => (pin.type || "memory") === activeList);
+
+  if (visiblePins.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "pin-list-empty";
+    empty.textContent = activeList === "memory"
+      ? "まだ思い出のピンがありません。"
+      : "行ってみたい場所を追加するとここに表示されます。";
+    container.append(empty);
+    return;
+  }
+
+  visiblePins.forEach((pin) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pin-list-item";
+    button.textContent = pin.title;
+    button.addEventListener("click", () => {
+      map.setView([pin.lat, pin.lng], 16);
+      markerById.get(pin.id)?.openPopup();
+      closeAppMenu();
+    });
+    container.append(button);
+  });
+}
+
+function openAppMenu() {
+  document.querySelector("#app-menu")?.classList.add("open");
+  document.querySelector("#menu-backdrop")?.classList.add("visible");
+  document.querySelector("#app-menu")?.setAttribute("aria-hidden", "false");
+  document.querySelector("#menu-open")?.setAttribute("aria-expanded", "true");
+}
+
+function closeAppMenu() {
+  document.querySelector("#app-menu")?.classList.remove("open");
+  document.querySelector("#menu-backdrop")?.classList.remove("visible");
+  document.querySelector("#app-menu")?.setAttribute("aria-hidden", "true");
+  document.querySelector("#menu-open")?.setAttribute("aria-expanded", "false");
+}
 
 function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
   const marker = L.marker([Number(lat), Number(lng)]).addTo(map);
   const id = pinId || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  markerById.set(id, marker);
 
   marker.bindPopup(`
     <strong>${escapeHtml(title)}</strong><br>
@@ -125,8 +173,10 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
 
     button?.addEventListener("click", () => {
       map.removeLayer(marker);
+      markerById.delete(id);
       savedPins = savedPins.filter((pin) => pin.id !== id);
       savePins(savedPins);
+      renderPinList();
     });
   });
 
@@ -135,14 +185,29 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
   }
 
   if (!pinId) {
-    savedPins.push({ id, lat: Number(lat), lng: Number(lng), title });
+    savedPins.push({ id, lat: Number(lat), lng: Number(lng), title, type: "memory" });
     savePins(savedPins);
+    renderPinList();
     marker.openPopup();
   }
 }
 
 savedPins.forEach((pin) => {
   addRemovablePin(pin.lat, pin.lng, pin.title, false, pin.id);
+});
+renderPinList();
+
+document.querySelector("#menu-open")?.addEventListener("click", openAppMenu);
+document.querySelector("#menu-close")?.addEventListener("click", closeAppMenu);
+document.querySelector("#menu-backdrop")?.addEventListener("click", closeAppMenu);
+document.querySelectorAll(".menu-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    activeList = tab.dataset.list;
+    document.querySelectorAll(".menu-tab").forEach((item) => {
+      item.classList.toggle("active", item === tab);
+    });
+    renderPinList();
+  });
 });
 
 map.on("click", (event) => {

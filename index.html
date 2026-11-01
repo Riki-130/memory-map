@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="theme-color" content="#2563eb">
-  <title>思い出マップ</title>
+  <meta name="theme-color" content="#197379">
+  <title>Memory Map</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
   <link
@@ -18,7 +21,7 @@
 <body>
   <div id="auth-loading" class="auth-panel visible">
     <div class="auth-card">
-      <h2>思い出マップ</h2>
+      <h2>Memory Map</h2>
       <p id="auth-message">Googleアカウントでログインしてください。</p>
       <button id="google-login" type="button">Googleでログイン</button>
       <div class="auth-actions">
@@ -29,9 +32,31 @@
     </div>
   </div>
 
-  <header>
-    <h1>思い出マップ</h1>
+  <div id="menu-backdrop" class="menu-backdrop" aria-hidden="true"></div>
+  <aside id="app-menu" class="app-menu" aria-hidden="true">
+    <div class="menu-heading">
+      <span>MENU</span>
+      <button id="menu-close" type="button" aria-label="メニューを閉じる">×</button>
+    </div>
+    <nav class="menu-tabs" aria-label="ピンリスト">
+      <button class="menu-tab active" type="button" data-list="memory">思い出リスト</button>
+      <button class="menu-tab" type="button" data-list="wishlist">行ってみたいリスト</button>
+    </nav>
+    <div id="pin-list" class="pin-list"></div>
     <button id="google-logout" class="logout-button" type="button">ログアウト</button>
+  </aside>
+
+  <header class="app-header">
+    <button id="menu-open" class="menu-open" type="button" aria-label="メニューを開く" aria-expanded="false">
+      <span></span><span></span><span></span>
+      <b>MENU</b>
+    </button>
+    <div class="title-wrap">
+      <div class="brand-title">
+        <span>Memory Map</span>
+        <img src="./assets/couple-characters.png" alt="ふたりのキャラクター">
+      </div>
+    </div>
     <form id="address-search">
       <input
         id="address-input"
@@ -53,7 +78,7 @@
   </script>
   <script src="./search-config.js"></script>
   <script src="./firebase-config.js"></script>
-  <script src="./app.js?v=202611010722"></script>
-  <script type="module" src="./firebase-auth.js?v=202611010722"></script>
+  <script src="./app.js?v=202611011332"></script>
+  <script type="module" src="./firebase-auth.js?v=202611011332"></script>
 </body>
 </html>
