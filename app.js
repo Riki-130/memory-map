@@ -463,6 +463,6 @@ document.querySelector("#address-search").addEventListener("submit", async (even
     alert("住所検索中にエラーが発生しました。");
   } finally {
     searchButton.disabled = false;
-    searchButton.textContent = "検索して追加";
+    searchButton.textContent = "ピン検索";
   }
 });
