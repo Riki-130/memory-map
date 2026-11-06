@@ -1,0 +1,15 @@
+{
+  "name": "Memory Map",
+  "short_name": "Memory Map",
+  "description": "ふたりの思い出と行ってみたい場所を共有する地図",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1ebcb",
+  "theme_color": "#197379",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

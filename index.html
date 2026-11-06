@@ -2,84 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#197379">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Memory Map">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Memory Map</title>
-
+  <link rel="icon" type="image/png" href="./icons/favicon-64.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="./assets/couple-characters.png">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css">
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="auth-loading" class="auth-panel visible">
-    <div class="auth-card">
-      <h2>Memory Map</h2>
-      <p id="auth-message">Googleアカウントでログインしてください。</p>
-      <button id="google-login" type="button">Googleでログイン</button>
-      <div class="auth-actions">
-        <button id="open-login-browser" type="button" hidden>ブラウザで開く</button>
-        <button id="copy-login-url" type="button" hidden>ログインURLをコピー</button>
-      </div>
-      <p id="auth-error" class="auth-error" role="alert"></p>
-    </div>
-  </div>
-
-  <div id="menu-backdrop" class="menu-backdrop" aria-hidden="true"></div>
-  <aside id="app-menu" class="app-menu" aria-hidden="true">
-    <div class="menu-heading">
-      <span>MENU</span>
-      <button id="menu-close" type="button" aria-label="メニューを閉じる">×</button>
-    </div>
-    <nav class="menu-tabs" aria-label="ピンリスト">
-      <button class="menu-tab active" type="button" data-list="memory">思い出リスト</button>
-      <button class="menu-tab" type="button" data-list="wishlist">行ってみたいリスト</button>
-    </nav>
-    <div id="pin-list" class="pin-list"></div>
-    <button id="google-logout" class="logout-button" type="button">ログアウト</button>
-  </aside>
-
-  <header class="app-header">
-    <button id="menu-open" class="menu-open" type="button" aria-label="メニューを開く" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="title-search-area">
-      <div class="brand-title" aria-label="Memory Map">
-        <span>Memory Map</span>
-        <small>おじいちゃん おばあちゃんになっても続く</small>
-      </div>
-      <form id="address-search">
-        <input
-          id="address-input"
-          type="search"
-          placeholder="住所や店名を検索"
-          aria-label="住所や店名を検索"
-          required
-        >
-        <button type="submit">ピン検索</button>
-      </form>
-    </div>
-    <img class="couple-icon" src="./assets/couple-characters.png" alt="ふたりのキャラクター">
-    <div id="search-candidates" aria-live="polite"></div>
-  </header>
-  <div id="map"></div>
-
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin="">
-  </script>
-  <script src="./search-config.js"></script>
-  <script src="./firebase-config.js"></script>
-  <script src="./app.js?v=202611061630"></script>
-  <script type="module" src="./firebase-auth.js?v=202611061630"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
