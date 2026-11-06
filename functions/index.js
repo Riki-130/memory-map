@@ -59,22 +59,31 @@ exports.searchPlaces = onRequest(
       return;
     }
 
-    const upstream = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": placesApiKey.value(),
-        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location"
-      },
-      body: JSON.stringify({
-        textQuery,
-        languageCode: "ja",
-        regionCode: "JP",
-        maxResultCount: 8
-      })
-    });
+    let upstream;
+    let data;
+    try {
+      upstream = await fetch("https://places.googleapis.com/v1/places:searchText", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": placesApiKey.value(),
+          "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location"
+        },
+        body: JSON.stringify({
+          textQuery,
+          languageCode: "ja",
+          regionCode: "JP",
+          maxResultCount: 8
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+      data = await upstream.json();
+    } catch (error) {
+      console.error("Places API request failed", error);
+      response.status(502).json({ error: "Places search failed" });
+      return;
+    }
 
-    const data = await upstream.json();
     if (!upstream.ok) {
       console.error("Places API error", upstream.status, data);
       response.status(502).json({ error: "Places search failed" });

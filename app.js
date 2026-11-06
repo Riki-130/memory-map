@@ -380,7 +380,12 @@ document.querySelector("#address-search").addEventListener("submit", async (even
   try {
     let found = null;
 
-    const places = await searchPlaces(query);
+    let places = [];
+    try {
+      places = await searchPlaces(query);
+    } catch (error) {
+      console.warn("Places search failed; falling back to other geocoders.", error);
+    }
     if (places.length > 0) {
       showPlaceCandidates(places, query);
       return;
