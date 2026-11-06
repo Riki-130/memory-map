@@ -5,11 +5,27 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
-const PIN_STORAGE_KEY = "memory-map:pins";
+// Pins were stored under one shared key before they were scoped per user.
+const LEGACY_PIN_STORAGE_KEY = "memory-map:pins";
 
-function loadPins() {
+function pinStorageKey(userId) {
+  return `memory-map:pins:${userId}`;
+}
+
+function loadPins(userId) {
   try {
-    const storedPins = JSON.parse(localStorage.getItem(PIN_STORAGE_KEY) || "[]");
+    const key = pinStorageKey(userId);
+    let stored = localStorage.getItem(key);
+
+    // Hand legacy pins to the first user who signs in on this browser.
+    const legacy = localStorage.getItem(LEGACY_PIN_STORAGE_KEY);
+    if (stored === null && legacy !== null) {
+      localStorage.setItem(key, legacy);
+      localStorage.removeItem(LEGACY_PIN_STORAGE_KEY);
+      stored = legacy;
+    }
+
+    const storedPins = JSON.parse(stored || "[]");
     return Array.isArray(storedPins) ? storedPins : [];
   } catch (error) {
     console.warn("Saved pins could not be read.", error);
@@ -18,8 +34,9 @@ function loadPins() {
 }
 
 function savePins(pins) {
+  if (!currentUserId) return;
   try {
-    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pins));
+    localStorage.setItem(pinStorageKey(currentUserId), JSON.stringify(pins));
   } catch (error) {
     console.warn("Pins could not be saved.", error);
   }
@@ -109,7 +126,8 @@ function makeSearchQueries(value) {
 }
 
 let clickPinCount = 0;
-let savedPins = loadPins();
+let currentUserId = null;
+let savedPins = [];
 let activeList = "memory";
 let markerById = new Map();
 
@@ -159,6 +177,8 @@ function closeAppMenu() {
 }
 
 function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
+  if (!currentUserId) return;
+
   const marker = L.marker([Number(lat), Number(lng)]).addTo(map);
   const id = pinId || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   markerById.set(id, marker);
@@ -192,9 +212,28 @@ function addRemovablePin(lat, lng, title, zoomAfterMove = false, pinId = null) {
   }
 }
 
-savedPins.forEach((pin) => {
-  addRemovablePin(pin.lat, pin.lng, pin.title, false, pin.id);
+function clearMarkers() {
+  markerById.forEach((marker) => map.removeLayer(marker));
+  markerById = new Map();
+}
+
+// Fired by firebase-auth.js whenever the signed-in user changes (uid is null on sign-out).
+window.addEventListener("memory-map:auth-changed", (event) => {
+  const userId = event.detail?.uid || null;
+  if (userId === currentUserId) return;
+
+  clearMarkers();
+  closeAppMenu();
+  document.querySelector("#search-candidates")?.classList.remove("visible");
+
+  currentUserId = userId;
+  savedPins = userId ? loadPins(userId) : [];
+  savedPins.forEach((pin) => {
+    addRemovablePin(pin.lat, pin.lng, pin.title, false, pin.id);
+  });
+  renderPinList();
 });
+
 renderPinList();
 
 document.querySelector("#menu-open")?.addEventListener("click", openAppMenu);
@@ -211,6 +250,7 @@ document.querySelectorAll(".menu-tab").forEach((tab) => {
 });
 
 map.on("click", (event) => {
+  if (!currentUserId) return;
   clickPinCount += 1;
   addRemovablePin(
     event.latlng.lat,

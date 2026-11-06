@@ -94,4 +94,7 @@ onAuthStateChanged(auth, (user) => {
   document.body.classList.toggle("authenticated", Boolean(user));
   authPanel.classList.toggle("visible", !user);
   logoutButton.hidden = !user;
+  window.dispatchEvent(new CustomEvent("memory-map:auth-changed", {
+    detail: { uid: user ? user.uid : null }
+  }));
 });
