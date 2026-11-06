@@ -193,7 +193,7 @@ Memory Map は、カップルが「行った場所の思い出」と「行って
 | 公開URL | `https://riki-130.github.io/memory-map/` |
 | Firebase プロジェクト | `memory-map-rh130-2026103-eff07` |
 | Firestore の場所 | `asia-northeast1` |
-| Storage の場所 | `us-central1`（無料枠の対象） |
+| Storage の場所 | `us-west1`（無料枠の対象で、日本から最も近い） |
 | Cloud Function | `searchPlaces`（`asia-northeast1`、Node.js 22、Secret `PLACES_API_KEY`） |
 | 実機確認 | Firebase Hosting のプレビューチャンネル |
 
