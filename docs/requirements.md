@@ -248,3 +248,101 @@ Googleアカウントでログインする必要がある旨を説明し、ユ�
 - Firestore共有
 - 招待・承認フロー
 - アクセス権限ルール
+
+## 15. 技術構成
+
+### 15.1 使用技術
+
+- フロントエンド：HTML、CSS、JavaScript
+- 地図ライブラリ：Leaflet
+- 地図タイル：OpenStreetMap
+- 場所検索：Google Places API（New）のText Search
+- 認証：Firebase Authentication、Googleログイン
+- サーバー処理：Firebase Functions v2
+- PWA：Web App Manifest、Service Worker
+- バージョン管理・公開：GitHub、GitHub Pages
+
+スマートフォンのホーム画面追加にも対応する。地図や認証以外のUIはブラウザ上の静的ファイルとして提供する。
+
+### 15.2 公開先
+
+- GitHubリポジトリ：`Riki-130/memory-map`
+- 公開URL：`https://riki-130.github.io/memory-map/`
+- ホスティング方式：GitHub Pages
+
+### 15.3 Firebase構成
+
+- FirebaseプロジェクトID：`memory-map-rh130-2026103-eff07`
+- Firebase Functionsランタイム：Node.js 22
+- Cloud Function：`searchPlaces`
+- Cloud Functionリージョン：`asia-northeast1`
+- Function用エンドポイント：`asia-northeast1-memory-map-rh130-2026103-eff07.cloudfunctions.net/searchPlaces`
+- Firebase Functions Secret：`PLACES_API_KEY`
+
+ブラウザ向けFirebase設定とPlaces APIキーは用途別に分離する。Places APIキーはSecretとしてサーバー側で管理し、HTMLやJavaScriptへ値を書かない。
+
+### 15.4 ファイル構成
+
+- `index.html`：画面構造、認証パネル、ヘッダー、メニュー、地図領域
+- `styles.css`：レスポンシブレイアウト、スマートフォン優先のUI、配色、メニュー
+- `app.js`：地図、ピン追加・削除、localStorage保存、場所検索候補、ピン一覧
+- `firebase-auth.js`：Firebase初期化、Googleログイン、ログアウト、LINE内ブラウザ案内
+- `firebase-config.js`：ブラウザ向けFirebase設定
+- `search-config.js`：`searchPlaces` Functionsエンドポイント設定
+- `manifest.json`：PWA設定
+- `service-worker.js`：PWAキャッシュ設定
+- `firebase.json`：Firebase Functionsソース設定
+- `.firebaserc`：Firebaseデフォルトプロジェクト設定
+- `assets/`：キャラクター画像など静的画像
+- `functions/index.js`：Google Places APIを呼び出す`searchPlaces` Function
+- `docs/requirements.md`：要件・設計・改善履歴
+
+### 15.5 外部API・サービス
+
+- GitHub Pagesの静的配信
+- OpenStreetMapの地図タイル
+- Google Places API
+- Firebase Authentication
+- Firebase Functions
+- 将来利用予定：Firestore、Firebase Storageまたは外部動画共有URL
+
+## 16. 改善履歴と次の作業
+
+### 16.1 このチャットで依頼した改善と対応状況
+
+| 優先度 | 依頼内容 | 対応状況 |
+|---|---|---|
+| 高 | LINE内ブラウザではGoogle認証を開始せず外部ブラウザへ案内する | 対応済み |
+| 高 | LINE案内文をメニュー存在を前提としない表現へ変更する | 対応済み |
+| 高 | 外部ブラウザ案内とURLコピーのボタンを縦配置にする | 対応済み |
+| 高 | 東京駅の初期ピンを削除する | 対応済み |
+| 高 | ピンをブラウザ更新・再ログイン後も保持する | 対応済み（localStorage） |
+| 高 | タイトルを「Memory Map」に変更する | 対応済み |
+| 高 | 左上メニューから思い出・行ってみたいリストを表示する | 一部対応済み（リストUIまで実装、種別登録は未完了） |
+| 高 | ログアウトを左側メニューの下部へ移動する | 対応済み |
+| 高 | キャラクター画像をタイトル付近へ縮小配置する | 対応済み |
+| 高 | スマートフォンで添付レイアウトに近いヘッダー構成へ変更する | 対応済み |
+| 高 | メニューアイコンを背景なしの三本線にする | 対応済み |
+| 高 | 指示用の色付き枠を実サイトから削除する | 対応済み |
+| 高 | キャラクターの黒背景のみ透過し人物の髪やまつ毛を保持する | 対応済み |
+| 高 | 「ピン検索」ボタンを青色にする | 対応済み |
+| 高 | 検索欄の縦幅を縮め、画面幅いっぱいに広げる | 対応済み |
+| 中 | サブタイトル「おじいちゃん おばあちゃんになっても続く」をタイトル下に配置する | 対応済み |
+| 中 | タイトル、検索欄、キャラクター、地図の階層を調整する | 対応済み |
+| 中 | キャラクターとタイトルの重なりで文字が読みにくくならないよう調整する | 対応済み |
+| 中 | タイトルとキャラクターをスマートフォン画面に収める | 対応済み |
+| 中 | キャラクターをブラウザアイコンとして設定する | 対応済み |
+
+### 16.2 優先度順の次の作業
+
+1. ピン種別を追加し、「思い出」と「行ってみたい」の登録・切り替えを実装する
+2. メニュー内リストを種別ごとに正しくフィルターし、選択時に該当ピンへ移動する
+3. ピンごとの本文メモ、写真、動画リンクを保存・表示する
+4. ピン色を11色以上から選択できるようにする
+5. 飲食店、観光地、遊園地などカテゴリ別のピンアイコンを用意する
+6. Firestoreへピンデータを移行し、端末間・ログイン間で同期する
+7. マップをホスト制で招待ユーザーのみ閲覧・編集できる共有仕様にする
+8. 招待リンク、承認状態、閲覧権限、編集権限を実装する
+9. 写真・動画の保存先とアクセス権限を整理する
+10. UIをPC・スマートフォンの実機で再確認し、検索候補やメニューの重なりを調整する
+11. PWAキャッシュ更新とサービスワーカーのバージョン管理を見直す
