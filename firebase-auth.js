@@ -12,6 +12,11 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
+// app.js is a classic script and cannot import this module, so expose what it needs on window.
+window.memoryMapAuth = {
+  getIdToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : null)
+};
+
 const loginButton = document.querySelector("#google-login");
 const logoutButton = document.querySelector("#google-logout");
 const authPanel = document.querySelector("#auth-loading");

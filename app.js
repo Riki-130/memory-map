@@ -307,9 +307,17 @@ async function searchPlaces(query) {
     console.warn("Search cache could not be read.", error);
   }
 
+  const idToken = await window.memoryMapAuth?.getIdToken();
+  if (!idToken) {
+    return [];
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`
+    },
     body: JSON.stringify({ query })
   });
 

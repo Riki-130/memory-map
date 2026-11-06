@@ -1,13 +1,55 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
+const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
+
+initializeApp();
 
 const placesApiKey = defineSecret("PLACES_API_KEY");
 
+// Browsers outside this list are rejected. Origin can be forged by non-browser
+// clients, so the ID token check below is the real access control.
+const ALLOWED_ORIGINS = [
+  "https://riki-130.github.io",
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/
+];
+
+function isAllowedOrigin(origin) {
+  return ALLOWED_ORIGINS.some((allowed) =>
+    typeof allowed === "string" ? allowed === origin : allowed.test(origin)
+  );
+}
+
+async function verifyUser(request) {
+  const match = /^Bearer (.+)$/.exec(request.get("Authorization") || "");
+  if (!match) {
+    return null;
+  }
+  try {
+    return await getAuth().verifyIdToken(match[1]);
+  } catch (error) {
+    console.warn("ID token verification failed", error.code || error.message);
+    return null;
+  }
+}
+
 exports.searchPlaces = onRequest(
-  { region: "asia-northeast1", secrets: [placesApiKey], cors: true },
+  { region: "asia-northeast1", secrets: [placesApiKey], cors: ALLOWED_ORIGINS },
   async (request, response) => {
+    if (!isAllowedOrigin(request.get("Origin") || "")) {
+      response.status(403).json({ error: "Origin not allowed" });
+      return;
+    }
+
     if (request.method !== "POST") {
       response.status(405).json({ error: "POST only" });
+      return;
+    }
+
+    const user = await verifyUser(request);
+    if (!user) {
+      response.status(401).json({ error: "Authentication required" });
       return;
     }
 
