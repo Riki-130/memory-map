@@ -11,6 +11,8 @@ const placesApiKey = defineSecret("PLACES_API_KEY");
 // clients, so the ID token check below is the real access control.
 const ALLOWED_ORIGINS = [
   "https://riki-130.github.io",
+  // Firebase Hosting preview channels used for testing on real devices.
+  /^https:\/\/memory-map-rh130-2026103-eff07(--[a-z0-9-]+)?\.web\.app$/,
   /^http:\/\/localhost(:\d+)?$/,
   /^http:\/\/127\.0\.0\.1(:\d+)?$/
 ];
@@ -67,7 +69,7 @@ exports.searchPlaces = onRequest(
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": placesApiKey.value(),
-          "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location"
+          "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.types"
         },
         body: JSON.stringify({
           textQuery,
@@ -95,7 +97,8 @@ exports.searchPlaces = onRequest(
       name: place.displayName?.text || textQuery,
       address: place.formattedAddress || "",
       lat: place.location?.latitude,
-      lng: place.location?.longitude
+      lng: place.location?.longitude,
+      types: place.types || []
     })).filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lng));
 
     response.json({ places });

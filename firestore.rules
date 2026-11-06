@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// Memory Map access model:
+//   - Only members of a map (maps/{mapId}.memberIds) can read or edit its pins.
+//   - Only the host (ownerId) can approve join requests, invite, or remove members.
+//   - Anyone signed in can request to join, but only with a valid, unexpired invite token.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function mapData(mapId) {
+      return get(/databases/$(database)/documents/maps/$(mapId)).data;
+    }
+
+    function isMember(mapId) {
+      return signedIn() && request.auth.uid in mapData(mapId).memberIds;
+    }
+
+    function isOwner(mapId) {
+      return signedIn() && mapData(mapId).ownerId == request.auth.uid;
+    }
+
+    function validInvite(mapId, token) {
+      let path = /databases/$(database)/documents/maps/$(mapId)/invites/$(token);
+      return token is string
+        && exists(path)
+        && get(path).data.active == true
+        && get(path).data.expiresAt > request.time;
+    }
+
+    function validPin(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 100
+        && data.lat is number && data.lng is number
+        && data.type in ['memory', 'wishlist']
+        && (!('address' in data) || (data.address is string && data.address.size() <= 200))
+        && (!('memo' in data) || (data.memo is string && data.memo.size() <= 2000))
+        && (!('photos' in data) || (data.photos is list && data.photos.size() <= 10))
+        && (!('videoLinks' in data) || (data.videoLinks is list && data.videoLinks.size() <= 20));
+    }
+
+    match /maps/{mapId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'ownerId', 'memberIds', 'members', 'createdAt'])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.memberIds == [request.auth.uid]
+        && request.resource.data.members.keys().hasOnly([request.auth.uid]);
+
+      // Host only. The host can never transfer ownership or remove themselves.
+      allow update: if signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.auth.uid in request.resource.data.memberIds;
+
+      allow delete: if false;
+
+      match /pins/{pinId} {
+        allow read, delete: if isMember(mapId);
+        allow create, update: if isMember(mapId) && validPin(request.resource.data);
+      }
+
+      match /invites/{token} {
+        // Tokens are random 144-bit values, so reading one requires already holding the link.
+        allow get: if signedIn();
+        allow list: if isOwner(mapId);
+        allow create: if isOwner(mapId) && request.resource.data.createdBy == request.auth.uid;
+        allow update, delete: if isOwner(mapId);
+      }
+
+      match /joinRequests/{uid} {
+        allow get: if signedIn() && (request.auth.uid == uid || isOwner(mapId));
+        allow list: if isOwner(mapId);
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['displayName', 'email', 'photoURL', 'token', 'createdAt'])
+          && request.resource.data.email == request.auth.token.email
+          && validInvite(mapId, request.resource.data.token);
+        allow delete: if isOwner(mapId) || (signedIn() && request.auth.uid == uid);
+      }
+    }
+  }
+}

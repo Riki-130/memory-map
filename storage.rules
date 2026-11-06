@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Photos live under maps/{mapId}/pins/{pinId}/ and are visible only to that map's members.
+// Membership is read from Firestore (cross-service rules).
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isMember(mapId) {
+      return request.auth != null
+        && request.auth.uid in firestore.get(/databases/(default)/documents/maps/$(mapId)).data.memberIds;
+    }
+
+    match /maps/{mapId}/pins/{pinId}/{fileName} {
+      allow read, delete: if isMember(mapId);
+      allow create, update: if isMember(mapId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
