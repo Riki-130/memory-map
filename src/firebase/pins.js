@@ -12,7 +12,7 @@ import { db, storage } from "./db.js";
 // maps/{mapId}/pins/{pinId}:
 //   title, address, lat, lng, placeId, type ("memory" | "wishlist"), category, icon,
 //   visitedAt ("YYYY-MM-DD" | ""), memo, photos[{id, path, thumbPath, width, height, uploadedBy}],
-//   videoLinks[], createdBy, createdAt, updatedAt
+//   links[] (web pages such as Tabelog), videoLinks[], createdBy, createdAt, updatedAt
 
 export function subscribePins(mapId, onChange, onError) {
   return onSnapshot(

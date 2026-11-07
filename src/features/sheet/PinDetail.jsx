@@ -42,18 +42,25 @@ export default function PinDetail({ pin, categories, expanded, onEdit, onDelete,
         {photos.length > 0 && <span className="chip">📷 {photos.length}</span>}
       </div>
 
-      {expanded && (
-        <>
-          {pin.memo && <p className="pin-memo">{pin.memo}</p>}
-          {pin.videoLinks?.length > 0 && (
-            <div className="video-links">
-              <h3>動画</h3>
-              {pin.videoLinks.map((link) => (
-                <a key={link} href={link} target="_blank" rel="noreferrer">▶ {shortLink(link)}</a>
-              ))}
-            </div>
-          )}
-        </>
+      {/* Memo and URLs are shown whenever they are filled in; nothing is shown otherwise. */}
+      {pin.memo && <p className={`pin-memo${expanded ? "" : " clamped"}`}>{pin.memo}</p>}
+      {pin.links?.length > 0 && (
+        <div className="video-links">
+          <h3>URL</h3>
+          {pin.links.map((link) => (
+            <a key={link} className="web-link" href={link} target="_blank" rel="noreferrer">
+              🔗 <span>{linkLabel(link)}</span>
+            </a>
+          ))}
+        </div>
+      )}
+      {pin.videoLinks?.length > 0 && (
+        <div className="video-links">
+          <h3>動画</h3>
+          {pin.videoLinks.map((link) => (
+            <a key={link} href={link} target="_blank" rel="noreferrer">▶ {shortLink(link)}</a>
+          ))}
+        </div>
       )}
 
       {onGoToPin && (
@@ -78,6 +85,32 @@ function shortLink(link) {
   try {
     const url = new URL(link);
     return url.hostname.replace(/^www\./, "");
+  } catch {
+    return link;
+  }
+}
+
+// Friendly names for common restaurant / travel sites; otherwise "domain/path".
+const SITE_NAMES = [
+  [/(^|\.)tabelog\.com$/, "食べログ"],
+  [/(^|\.)hotpepper\.jp$/, "ホットペッパー"],
+  [/(^|\.)retty\.me$/, "Retty"],
+  [/(^|\.)gnavi\.co\.jp$/, "ぐるなび"],
+  [/(^|\.)ikyu\.com$/, "一休"],
+  [/(^|\.)instagram\.com$/, "Instagram"],
+  [/(^|\.)jalan\.net$/, "じゃらん"],
+  [/(^|\.)tripadvisor\.(jp|com)$/, "トリップアドバイザー"],
+  [/(^|\.)(maps\.app\.goo\.gl|google\.[a-z.]+)$/, "Google"]
+];
+
+function linkLabel(link) {
+  try {
+    const url = new URL(link);
+    const host = url.hostname.replace(/^www\./, "");
+    const site = SITE_NAMES.find(([pattern]) => pattern.test(host));
+    const path = decodeURIComponent(url.pathname).replace(/\/$/, "");
+    const shortPath = path.length > 24 ? `${path.slice(0, 24)}…` : path;
+    return site ? `${site[1]}${shortPath ? `（${host}${shortPath}）` : ""}` : `${host}${shortPath}`;
   } catch {
     return link;
   }

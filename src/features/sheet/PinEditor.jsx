@@ -12,6 +12,7 @@ function toForm(pin) {
     icon: pinIcon(pin),
     visitedAt: pin.visitedAt || "",
     memo: pin.memo || "",
+    links: (pin.links || []).join("\n"),
     videoLinks: (pin.videoLinks || []).join("\n")
   };
 }
@@ -84,7 +85,12 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, 
       setError("場所名を入力してください。");
       return;
     }
-    const videoLinks = form.videoLinks.split(/\s+/).map((link) => link.trim()).filter(Boolean);
+    const links = splitUrls(form.links);
+    if (links.some((link) => !/^https?:\/\//.test(link))) {
+      setError("URLは https:// から始まる形で、1行に1つずつ入力してください。");
+      return;
+    }
+    const videoLinks = splitUrls(form.videoLinks);
     if (videoLinks.some((link) => !/^https?:\/\//.test(link))) {
       setError("動画リンクは https:// から始まるURLを入力してください。");
       return;
@@ -104,6 +110,7 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, 
         visitedAt: form.type === "memory" ? form.visitedAt : "",
         memo: form.memo.trim(),
         photos,
+        links,
         videoLinks
       }, user, isNew);
       removedPhotos.forEach(deletePhotoFiles);
@@ -181,6 +188,19 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, 
         <textarea rows={4} value={form.memo} onChange={(event) => update("memo", event.target.value)} maxLength={2000} placeholder="ふたりの思い出を残そう" />
       </label>
 
+      <label className="field">
+        <span>URL（食べログなど・1行に1つ）</span>
+        <textarea
+          rows={2}
+          value={form.links}
+          onChange={(event) => update("links", event.target.value)}
+          placeholder="https://tabelog.com/..."
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+        />
+      </label>
+
       <div className="field">
         <span>写真（{photos.length}/{MAX_PHOTOS_PER_PIN}）</span>
         <div className="photo-grid">
@@ -217,4 +237,8 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, 
       </div>
     </form>
   );
+}
+
+function splitUrls(text) {
+  return text.split(/\s+/).map((link) => link.trim()).filter(Boolean);
 }

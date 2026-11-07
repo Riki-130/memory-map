@@ -237,6 +237,9 @@ button:disabled { opacity: 0.6; cursor: default; }
 .pin-address { margin: 4px 0 0; font-size: 0.85rem; color: var(--muted); }
 .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .pin-memo { white-space: pre-wrap; line-height: 1.8; margin: 16px 0 0; }
+.pin-memo.clamped { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.web-link { display: flex; gap: 6px; align-items: baseline; word-break: break-all; }
+.web-link span { text-decoration: underline; }
 .video-links { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
 .video-links h3 { margin: 0; font-size: 0.9rem; color: var(--muted); }
 .video-links a { color: var(--teal); }
