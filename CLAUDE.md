@@ -10,7 +10,7 @@ Memory Map は、カップル（将来は友人カップルも）が思い出の
 
 - `npm run dev`：開発サーバー（http://localhost:5173/memory-map/）を起動する。`.env.local` に `VITE_GOOGLE_MAPS_API_KEY` が必要（`.env.example` 参照）。
 - `npm run build`：GitHub Pages 用に、`/memory-map/` を基準パスとして `dist/` に出力する。
-- `npm run build:preview`：Firebase Hosting のプレビューチャンネル用に、ルート `/` を基準パスとして出力する。
+- `npm run build:preview`：Firebase Hosting（ステージング）用に、ルート `/` を基準パスとして出力する。
 - `scripts/make-icons.sh [画像]`：正方形の画像から、PWA とホーム画面用のアイコンを `public/icons/` に生成する（macOS の `sips` を使用）。
 - lint とテストの仕組みはまだ無い。
 - この環境では `~/.npm` に root 所有のファイルがあり、npm や npx が失敗することがある。その場合は `npm_config_cache=<scratchpad>/npm-cache` を付けて実行する。
@@ -19,7 +19,7 @@ Memory Map は、カップル（将来は友人カップルも）が思い出の
 
 - **フロントエンド**：main に push すると、`.github/workflows/deploy.yml` がビルドして GitHub Pages に公開する。ビルドに必要な `VITE_GOOGLE_MAPS_API_KEY` と `VITE_GOOGLE_MAP_ID` は、リポジトリの Variables に登録してある。
 - **Function・ルール**：`npx firebase-tools deploy --only functions`、`--only firestore:rules,storage` で反映する。
-- **実機での確認**：`npm run build:preview` のあと `npx firebase-tools hosting:channel:deploy preview` を実行する。プレビューのドメインは、Auth の承認済みドメインと Maps キーのリファラーに登録が必要。
+- **実機での確認（ステージング）**：`npm run build:preview` のあと `npx firebase-tools deploy --only hosting` を実行すると、https://memory-map-rh130-2026103-eff07.web.app に公開される。このドメインは、2つのブラウザ用キーのリファラー、Auth の承認済みドメイン（既定で許可）、`searchPlaces` の送信元の許可リストに登録済み。
 
 ## アーキテクチャ
 
