@@ -56,11 +56,40 @@ function MapScreenInner({ map, user }) {
     } catch {
       // ignore
     }
-    return subscribePins(map.id, setPins, (error) => {
-      console.error(error);
-      setPinsError("ピンを読み込めませんでした。");
-    });
+    // A listener stops for good after an error (e.g. permission-denied while a just-created
+    // map is still syncing), so retry with backoff and only surface persistent failures.
+    let unsubscribe = () => {};
+    let retryTimer = null;
+    let attempt = 0;
+    const listen = () => {
+      unsubscribe = subscribePins(
+        map.id,
+        (nextPins) => {
+          attempt = 0;
+          setPinsError("");
+          setPins(nextPins);
+        },
+        (error) => {
+          console.warn("Pin listener failed", error);
+          attempt += 1;
+          if (attempt >= 3) setPinsError("ピンを読み込めませんでした。通信状況を確認してください。");
+          retryTimer = setTimeout(listen, Math.min(1000 * 2 ** attempt, 30000));
+        }
+      );
+    };
+    listen();
+    return () => {
+      clearTimeout(retryTimer);
+      unsubscribe();
+    };
   }, [map.id]);
+
+  // The "how to add pins" hint is shown briefly when the map is empty.
+  const [showHint, setShowHint] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowHint(false), 6000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const visiblePins = useMemo(
     () => (filter === "all" ? pins : pins.filter((pin) => pin.type === filter)),
@@ -178,9 +207,13 @@ function MapScreenInner({ map, user }) {
             </button>
           ))}
         </div>
-        {pinsError && <p className="toast glass">{pinsError}</p>}
-        {!sheetOpen && pins.length === 0 && (
-          <p className="toast glass">地図を長押しするか、検索してピンを追加しましょう</p>
+        {pinsError && (
+          <button type="button" className="toast glass" onClick={() => setPinsError("")}>{pinsError}</button>
+        )}
+        {showHint && !pinsError && !sheetOpen && pins.length === 0 && (
+          <button type="button" className="toast glass" onClick={() => setShowHint(false)}>
+            地図を長押しするか、検索してピンを追加しましょう
+          </button>
         )}
       </div>
 

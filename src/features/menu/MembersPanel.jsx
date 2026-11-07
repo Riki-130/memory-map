@@ -89,7 +89,7 @@ export default function MembersPanel({ map, user }) {
       )}
 
       <section>
-        <h3>メンバー（{members.length}）</h3>
+        <h3>メンバーリスト（{members.length}）</h3>
         <ul className="member-list">
           {members.map(([uid, member]) => (
             <li key={uid}>
