@@ -5,7 +5,7 @@ import { pinIcon } from "../pins/categories.js";
 
 const LONG_PRESS_MS = 550;
 
-export default function MapCanvas({ pins, draft, selectedPinId, focus, onSelectPin, onLongPress, onPlaceClick, onMapClick }) {
+export default function MapCanvas({ pins, draft, selectedPinId, focus, userLocation, onSelectPin, onLongPress, onPlaceClick, onMapClick }) {
   return (
     <Map
       className="map-canvas"
@@ -42,6 +42,12 @@ export default function MapCanvas({ pins, draft, selectedPinId, focus, onSelectP
           <PinMarker pin={pin} selected={pin.id === selectedPinId} />
         </AdvancedMarker>
       ))}
+
+      {userLocation && (
+        <AdvancedMarker position={userLocation} zIndex={900} clickable={false}>
+          <div className="user-location" aria-label="現在地" />
+        </AdvancedMarker>
+      )}
 
       {draft && (
         <AdvancedMarker position={{ lat: draft.lat, lng: draft.lng }} zIndex={1001}>

@@ -22,6 +22,8 @@
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Set from main.jsx for iOS home-screen apps; falls back to the viewport height. */
+  --screen-height: var(--app-height, 100%);
   color-scheme: light;
 }
 
@@ -90,7 +92,7 @@ button:disabled { opacity: 0.6; cursor: default; }
 
 /* ---------- Login (title screen) ---------- */
 .login {
-  position: fixed; inset: 0; overflow: hidden; background: #0b1530;
+  position: fixed; top: 0; left: 0; right: 0; height: var(--screen-height); overflow: hidden; background: #0b1530;
 }
 .login::before {
   /* blurred fill for screens wider than the artwork (PC / iPad) */
@@ -99,15 +101,19 @@ button:disabled { opacity: 0.6; cursor: default; }
   filter: blur(28px) brightness(0.7);
 }
 .login-stage {
-  /* Artwork is 851x1847; keep its proportions so the button lands between the
-     "Since" line (~25%) and the characters (~45%) on every screen. */
+  /* The stage has the artwork's exact proportions (851x1847), so percentages below are
+     positions on the picture: "Since" line ~26%, the characters' heads ~47%. */
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  height: 100%; aspect-ratio: 851 / 1847;
-  min-width: min(100%, 480px);
+  aspect-ratio: 851 / 1847;
+  width: max(100vw, calc(var(--app-height, 100vh) * 851 / 1847));
 }
-.login-art { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+@media (min-aspect-ratio: 3 / 5) {
+  /* PC / tablet: show the whole picture as a centred column. */
+  .login-stage { width: auto; height: 100%; }
+}
+.login-art { width: 100%; height: 100%; display: block; }
 .login-actions {
-  position: absolute; left: 50%; top: 40%; transform: translateX(-50%);
+  position: absolute; left: 50%; top: 33%; transform: translateX(-50%);
   width: min(78vw, 320px); display: flex; flex-direction: column; gap: 10px; align-items: stretch;
 }
 .glass-button {
@@ -131,7 +137,7 @@ button:disabled { opacity: 0.6; cursor: default; }
 .login-error { background: rgba(120, 20, 20, 0.5); }
 
 /* ---------- Map screen ---------- */
-.map-screen { position: fixed; inset: 0; }
+.map-screen { position: fixed; top: 0; left: 0; right: 0; height: var(--screen-height); }
 .map-canvas { position: absolute; inset: 0; -webkit-touch-callout: none; user-select: none; }
 
 .map-overlay-top {
@@ -230,7 +236,7 @@ button:disabled { opacity: 0.6; cursor: default; }
 .video-links a { color: var(--teal); }
 
 .photo-viewer {
-  position: fixed; inset: 0; z-index: 100; background: rgba(15, 11, 8, 0.92);
+  position: fixed; top: 0; left: 0; right: 0; height: var(--screen-height); z-index: 100; background: rgba(15, 11, 8, 0.92);
   display: grid; place-items: center; padding: calc(var(--safe-top) + 12px) 12px calc(var(--safe-bottom) + 60px);
 }
 .photo-viewer-image { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; }
@@ -272,12 +278,12 @@ button:disabled { opacity: 0.6; cursor: default; }
 
 /* ---------- Side menu ---------- */
 .menu-backdrop {
-  position: fixed; inset: 0; z-index: 30; background: rgba(15, 11, 8, 0.35);
+  position: fixed; top: 0; left: 0; right: 0; height: var(--screen-height); z-index: 30; background: rgba(15, 11, 8, 0.35);
   opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
 }
 .menu-backdrop.visible { opacity: 1; pointer-events: auto; }
 .side-menu {
-  position: fixed; top: 0; bottom: 0; left: 0; z-index: 31; width: min(88vw, 380px);
+  position: fixed; top: 0; left: 0; height: var(--screen-height); z-index: 31; width: min(88vw, 380px);
   display: flex; flex-direction: column;
   background: linear-gradient(180deg, var(--teal) 0, var(--teal-dark) 150px, var(--paper) 150px);
   transform: translateX(-102%); transition: transform 0.28s ease;
@@ -287,16 +293,17 @@ button:disabled { opacity: 0.6; cursor: default; }
 .side-menu.open { transform: translateX(0); }
 .menu-header { position: relative; display: flex; gap: 12px; align-items: flex-end; padding: 16px 16px 14px; color: #fff; min-height: 126px; }
 .menu-header img { width: 66px; height: auto; }
-.menu-brand { flex: 1; align-self: center; text-align: center; font-family: var(--font-script); font-size: 2.6rem; margin: 18px 0 0; line-height: 1; }
+.menu-brand { flex: 1; align-self: flex-start; text-align: center; font-family: var(--font-script); font-size: 2.6rem; margin: 10px 40px 0 0; line-height: 1; }
 .settings-button {
-  width: 32px; height: 32px; margin-bottom: 0; border: 0; border-radius: 8px;
+  position: absolute; top: calc(var(--safe-top) + 54px); right: 16px;
+  width: 32px; height: 32px; border: 0; border-radius: 8px;
   display: grid; place-items: center; color: #fff;
   background: linear-gradient(180deg, #a3aab0, #6e767d);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .settings-button svg { width: 21px; height: 21px; }
 .settings-button.active { outline: 2px solid var(--butter); outline-offset: 2px; }
-.menu-close { position: absolute; top: 12px; right: 14px; color: #fff; font-size: 26px; width: 32px; height: 32px; }
+.menu-close { position: absolute; top: calc(var(--safe-top) + 12px); right: 16px; color: #fff; font-size: 26px; width: 32px; height: 32px; }
 .settings-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .back-button { align-self: flex-start; margin: 10px 10px 0; }
 .list-toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
@@ -380,3 +387,20 @@ button:disabled { opacity: 0.6; cursor: default; }
 .icon-palette button.active { background: var(--mint-pale); }
 .icon-palette button:disabled { opacity: 0.2; }
 .reset-button { margin-top: 8px; font-size: 0.8rem; color: var(--muted); }
+
+/* Current location */
+.locate-button {
+  position: absolute; right: 14px; bottom: calc(var(--safe-bottom) + 36px); z-index: 10;
+  width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.92);
+}
+.locate-dot {
+  width: 16px; height: 16px; border-radius: 50%; background: #1a73e8;
+  box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.2);
+}
+.locate-button.locating .locate-dot { animation: pulse 1s ease-in-out infinite; }
+.user-location {
+  width: 18px; height: 18px; border-radius: 50%; background: #1a73e8; border: 3px solid #fff;
+  box-shadow: 0 0 0 8px rgba(26, 115, 232, 0.2), 0 2px 6px rgba(0, 0, 0, 0.3);
+  transform: translateY(50%);
+}

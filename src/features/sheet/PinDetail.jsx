@@ -2,7 +2,8 @@ import { useState } from "react";
 import PhotoImage from "../pins/PhotoImage.jsx";
 import { PIN_TYPES, categoryLabel, pinIcon } from "../pins/categories.js";
 
-export default function PinDetail({ pin, categories, expanded, onEdit, onDelete }) {
+// Used in the map's bottom sheet (edit/route/delete) and in the menu (go to pin/route).
+export default function PinDetail({ pin, categories, expanded, onEdit, onDelete, onGoToPin }) {
   const [viewerIndex, setViewerIndex] = useState(null);
   const icon = pinIcon(pin);
   const photos = pin.photos || [];
@@ -55,9 +56,18 @@ export default function PinDetail({ pin, categories, expanded, onEdit, onDelete 
       )}
 
       <div className="sheet-actions">
-        <button className="primary-button" type="button" onClick={onEdit}>編集</button>
-        <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
-        <button className="danger-button" type="button" onClick={onDelete}>削除</button>
+        {onGoToPin ? (
+          <>
+            <button className="primary-button" type="button" onClick={onGoToPin}>ピンに移動</button>
+            <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
+          </>
+        ) : (
+          <>
+            <button className="primary-button" type="button" onClick={onEdit}>編集</button>
+            <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
+            <button className="danger-button" type="button" onClick={onDelete}>削除</button>
+          </>
+        )}
       </div>
 
       {viewerIndex !== null && (

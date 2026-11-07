@@ -45,6 +45,9 @@ function MapScreenInner({ map, user }) {
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [focus, setFocus] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const lastLongPressRef = useRef(0);
 
   const categories = mapCategories(map);
@@ -191,6 +194,33 @@ function MapScreenInner({ map, user }) {
     }
   }
 
+  // Uses the device's own geolocation (free; no Google API call), then just pans the map.
+  function showMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationError("この端末では現在地を取得できません。");
+      return;
+    }
+    setLocating(true);
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const here = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserLocation(here);
+        setFocus({ ...here, zoom: 15, key: Date.now() });
+        setLocating(false);
+      },
+      (error) => {
+        setLocating(false);
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? "位置情報がオフです。iPhoneの設定 → プライバシー → 位置情報サービス → Safari（Webサイト）で許可してください。"
+            : "現在地を取得できませんでした。"
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  }
+
   const sheetOpen = Boolean(draft || selectedPin);
 
   return (
@@ -200,6 +230,7 @@ function MapScreenInner({ map, user }) {
         draft={draft}
         selectedPinId={selectedPinId}
         focus={focus}
+        userLocation={userLocation}
         onSelectPin={selectPin}
         onLongPress={handleLongPress}
         onPlaceClick={handlePlaceClick}
@@ -215,6 +246,9 @@ function MapScreenInner({ map, user }) {
             </button>
           ))}
         </div>
+        {locationError && (
+          <button type="button" className="toast glass" onClick={() => setLocationError("")}>{locationError}</button>
+        )}
         {pinsError && (
           <button type="button" className="toast glass" onClick={() => setPinsError("")}>{pinsError}</button>
         )}
@@ -224,6 +258,18 @@ function MapScreenInner({ map, user }) {
           </button>
         )}
       </div>
+
+      {!sheetOpen && (
+        <button
+          type="button"
+          className={`locate-button glass${locating ? " locating" : ""}`}
+          aria-label="現在地を表示"
+          onClick={showMyLocation}
+          disabled={locating}
+        >
+          <span className="locate-dot" />
+        </button>
+      )}
 
       {sheetOpen && (
         <BottomSheet expanded={expanded || editing || Boolean(draft)} onExpandedChange={setExpanded} onClose={closeSheet}>

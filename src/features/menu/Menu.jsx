@@ -4,6 +4,7 @@ import { categoryLabel, pinIcon } from "../pins/categories.js";
 import { signOutUser } from "../auth/useAuth.js";
 import MembersPanel from "./MembersPanel.jsx";
 import CategoryEditor from "./CategoryEditor.jsx";
+import PinDetail from "../sheet/PinDetail.jsx";
 
 const TABS = [
   { id: "album", label: "思い出アルバム" },
@@ -17,6 +18,8 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newestFirst, setNewestFirst] = useState(true);
   const [wishIcon, setWishIcon] = useState("all");
+  const [viewingPinId, setViewingPinId] = useState(null);
+  const viewingPin = pins.find((pin) => pin.id === viewingPinId) || null;
 
   const byTitle = (a, b) => a.title.localeCompare(b.title, "ja");
   // Undated memories always go last, whichever direction is chosen.
@@ -34,7 +37,13 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
 
   function close() {
     setSettingsOpen(false);
+    setViewingPinId(null);
     onClose();
+  }
+
+  function goToPin(pinId) {
+    setViewingPinId(null);
+    onSelectPin(pinId);
   }
 
   return (
@@ -55,7 +64,16 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
           <button className="icon-button menu-close" type="button" aria-label="メニューを閉じる" onClick={close}>×</button>
         </header>
 
-        {settingsOpen ? (
+        {viewingPin && !settingsOpen ? (
+          <div className="settings-view">
+            <button className="text-button back-button" type="button" onClick={() => setViewingPinId(null)}>
+              ‹ {viewingPin.type === "memory" ? "思い出アルバム" : "行ってみたいリスト"}に戻る
+            </button>
+            <div className="menu-content">
+              <PinDetail pin={viewingPin} categories={categories} expanded onGoToPin={() => goToPin(viewingPin.id)} />
+            </div>
+          </div>
+        ) : settingsOpen ? (
           <div className="settings-view">
             <button className="text-button back-button" type="button" onClick={() => setSettingsOpen(false)}>‹ メニューに戻る</button>
             <div className="menu-content">
@@ -85,7 +103,7 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
                         ⇅ {newestFirst ? "日付が新しい順" : "日付が古い順"}
                       </button>
                     </div>
-                    <PinCards pins={memories} categories={categories} onSelectPin={onSelectPin} showDate />
+                    <PinCards pins={memories} categories={categories} onSelectPin={setViewingPinId} showDate />
                   </>
                 )
               )}
@@ -110,7 +128,7 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
                         </button>
                       ))}
                     </div>
-                    <PinCards pins={visibleWishes} categories={categories} onSelectPin={onSelectPin} />
+                    <PinCards pins={visibleWishes} categories={categories} onSelectPin={setViewingPinId} />
                   </>
                 )
               )}

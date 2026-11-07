@@ -62,7 +62,11 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, 
         setPhotos((current) => [...current, photo]);
       } catch (uploadError) {
         console.error(uploadError);
-        setError("写真をアップロードできませんでした。");
+        setError(
+          uploadError.code === "storage/unauthorized"
+            ? "写真を保存する権限がありません（storage/unauthorized）。Storage の権限設定を確認してください。"
+            : `写真をアップロードできませんでした（${uploadError.code || uploadError.message}）。`
+        );
       } finally {
         setUploads((current) => current.filter((item) => item.id !== uploadId));
       }
