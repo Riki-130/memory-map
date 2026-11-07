@@ -5,6 +5,7 @@ import { signOutUser } from "../auth/useAuth.js";
 import MembersPanel from "./MembersPanel.jsx";
 import CategoryEditor from "./CategoryEditor.jsx";
 import PinDetail from "../sheet/PinDetail.jsx";
+import PinEditor from "../sheet/PinEditor.jsx";
 
 const TABS = [
   { id: "album", label: "思い出アルバム" },
@@ -13,12 +14,13 @@ const TABS = [
 
 const charactersImage = `${import.meta.env.BASE_URL}images/couple-characters.png`;
 
-export default function Menu({ open, onClose, map, user, pins, categories, onSelectPin }) {
+export default function Menu({ open, onClose, map, user, pins, categories, onSelectPin, onDeletePin }) {
   const [tab, setTab] = useState("album");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newestFirst, setNewestFirst] = useState(true);
   const [wishIcon, setWishIcon] = useState("all");
   const [viewingPinId, setViewingPinId] = useState(null);
+  const [editingPin, setEditingPin] = useState(false);
   const viewingPin = pins.find((pin) => pin.id === viewingPinId) || null;
 
   const byTitle = (a, b) => a.title.localeCompare(b.title, "ja");
@@ -38,7 +40,13 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
   function close() {
     setSettingsOpen(false);
     setViewingPinId(null);
+    setEditingPin(false);
     onClose();
+  }
+
+  function backToList() {
+    setViewingPinId(null);
+    setEditingPin(false);
   }
 
   function goToPin(pinId) {
@@ -66,11 +74,33 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
 
         {viewingPin && !settingsOpen ? (
           <div className="settings-view">
-            <button className="text-button back-button" type="button" onClick={() => setViewingPinId(null)}>
-              ‹ {viewingPin.type === "memory" ? "思い出アルバム" : "行ってみたいリスト"}に戻る
-            </button>
+            {!editingPin && (
+              <button className="text-button back-button" type="button" onClick={backToList}>
+                ‹ {viewingPin.type === "memory" ? "思い出アルバム" : "行ってみたいリスト"}に戻る
+              </button>
+            )}
             <div className="menu-content">
-              <PinDetail pin={viewingPin} categories={categories} expanded onGoToPin={() => goToPin(viewingPin.id)} />
+              {editingPin ? (
+                <PinEditor
+                  key={viewingPin.id}
+                  mapId={map.id}
+                  pinId={viewingPin.id}
+                  pin={viewingPin}
+                  user={user}
+                  categories={categories}
+                  onSaved={() => setEditingPin(false)}
+                  onCancel={() => setEditingPin(false)}
+                />
+              ) : (
+                <PinDetail
+                  pin={viewingPin}
+                  categories={categories}
+                  expanded
+                  onGoToPin={() => goToPin(viewingPin.id)}
+                  onEdit={() => setEditingPin(true)}
+                  onDelete={() => onDeletePin(viewingPin)}
+                />
+              )}
             </div>
           </div>
         ) : settingsOpen ? (

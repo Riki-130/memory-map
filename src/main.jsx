@@ -9,6 +9,7 @@ import "./styles/app.css";
 function syncAppHeight() {
   const standalone = navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
   const root = document.documentElement;
+  root.classList.toggle("standalone", standalone);
   if (!standalone) {
     root.style.removeProperty("--app-height");
     return;

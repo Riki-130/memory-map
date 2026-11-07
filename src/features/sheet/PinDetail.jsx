@@ -1,8 +1,9 @@
 import { useState } from "react";
 import PhotoImage from "../pins/PhotoImage.jsx";
+import PhotoViewer from "../pins/PhotoViewer.jsx";
 import { PIN_TYPES, categoryLabel, pinIcon } from "../pins/categories.js";
 
-// Used in the map's bottom sheet (edit/route/delete) and in the menu (go to pin/route).
+// Used in the map's bottom sheet and in the menu; the menu also passes onGoToPin.
 export default function PinDetail({ pin, categories, expanded, onEdit, onDelete, onGoToPin }) {
   const [viewerIndex, setViewerIndex] = useState(null);
   const icon = pinIcon(pin);
@@ -55,32 +56,19 @@ export default function PinDetail({ pin, categories, expanded, onEdit, onDelete,
         </>
       )}
 
+      {onGoToPin && (
+        <div className="sheet-actions">
+          <button className="primary-button" type="button" onClick={onGoToPin}>ピンに移動</button>
+        </div>
+      )}
       <div className="sheet-actions">
-        {onGoToPin ? (
-          <>
-            <button className="primary-button" type="button" onClick={onGoToPin}>ピンに移動</button>
-            <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
-          </>
-        ) : (
-          <>
-            <button className="primary-button" type="button" onClick={onEdit}>編集</button>
-            <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
-            <button className="danger-button" type="button" onClick={onDelete}>削除</button>
-          </>
-        )}
+        <button className={onGoToPin ? "secondary-button" : "primary-button"} type="button" onClick={onEdit}>編集</button>
+        <a className="secondary-button" href={routeUrl} target="_blank" rel="noreferrer">ルート</a>
+        <button className="danger-button" type="button" onClick={onDelete}>削除</button>
       </div>
 
       {viewerIndex !== null && (
-        <div className="photo-viewer" role="dialog" aria-label="写真" onClick={() => setViewerIndex(null)}>
-          <PhotoImage className="photo-viewer-image" path={photos[viewerIndex].path} alt="" />
-          {photos.length > 1 && (
-            <div className="photo-viewer-nav" onClick={(event) => event.stopPropagation()}>
-              <button type="button" onClick={() => setViewerIndex((viewerIndex + photos.length - 1) % photos.length)}>‹</button>
-              <span>{viewerIndex + 1} / {photos.length}</span>
-              <button type="button" onClick={() => setViewerIndex((viewerIndex + 1) % photos.length)}>›</button>
-            </div>
-          )}
-        </div>
+        <PhotoViewer photos={photos} startIndex={viewerIndex} title={pin.title} onClose={() => setViewerIndex(null)} />
       )}
     </div>
   );

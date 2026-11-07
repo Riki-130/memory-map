@@ -307,7 +307,7 @@ function MapScreenInner({ map, user }) {
         </BottomSheet>
       )}
 
-      <Menu open={menuOpen} onClose={() => setMenuOpen(false)} map={map} user={user} pins={pins} categories={categories} onSelectPin={selectPin} />
+      <Menu open={menuOpen} onClose={() => setMenuOpen(false)} map={map} user={user} pins={pins} categories={categories} onSelectPin={selectPin} onDeletePin={handleDelete} />
     </div>
   );
 }
