@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
   where,
   writeBatch
 } from "firebase/firestore";
@@ -141,4 +142,11 @@ export function removeMember(mapId, uid) {
     [`members.${uid}`]: deleteField()
   });
   return batch.commit();
+}
+
+// Any member may edit the category list (firestore.rules allows members to change only this field).
+export function updateCategories(mapId, categories) {
+  return updateDoc(doc(db, "maps", mapId), {
+    categories: categories.map(({ icon, label }) => ({ icon, label: label.trim() }))
+  });
 }

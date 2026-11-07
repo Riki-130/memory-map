@@ -2,22 +2,21 @@ import { useRef, useState } from "react";
 import { deletePhotoFiles, savePin, uploadPhoto } from "../../firebase/pins.js";
 import { MAX_PHOTOS_PER_PIN } from "../../config.js";
 import PhotoImage from "../pins/PhotoImage.jsx";
-import { CATEGORIES, ICON_CHOICES, PIN_TYPES, categoryById } from "../pins/categories.js";
+import { FALLBACK_ICON, PIN_TYPES, pinIcon } from "../pins/categories.js";
 
 function toForm(pin) {
   return {
     title: pin.title || "",
     address: pin.address || "",
     type: pin.type || "memory",
-    category: pin.category || "other",
-    icon: pin.icon || categoryById(pin.category).icon,
+    icon: pinIcon(pin),
     visitedAt: pin.visitedAt || "",
     memo: pin.memo || "",
     videoLinks: (pin.videoLinks || []).join("\n")
   };
 }
 
-export default function PinEditor({ mapId, pinId, pin, isNew, user, loadingAddress, onSaved, onCancel }) {
+export default function PinEditor({ mapId, pinId, pin, isNew, user, categories, loadingAddress, onSaved, onCancel }) {
   const [form, setForm] = useState(() => toForm(pin));
   const [photos, setPhotos] = useState(pin.photos || []);
   const [removedPhotos, setRemovedPhotos] = useState([]);
@@ -34,24 +33,17 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, loadingAddre
     setForm((current) => ({
       ...current,
       title: current.title || pin.title || "",
-      address: current.address || pin.address || "",
-      category: pin.category && current.category === "other" ? pin.category : current.category,
-      icon: pin.category && current.category === "other" ? categoryById(pin.category).icon : current.icon
+      address: current.address || pin.address || ""
     }));
   }
+
+  // Keep a pin's current icon selectable even if its category was removed from the list.
+  const categoryOptions = categories.some((category) => category.icon === form.icon)
+    ? categories
+    : [...categories, { icon: form.icon || FALLBACK_ICON, label: "カテゴリなし" }];
 
   function update(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
-  }
-
-  function changeCategory(categoryId) {
-    const previousDefault = categoryById(form.category).icon;
-    setForm((current) => ({
-      ...current,
-      category: categoryId,
-      // Keep a custom icon; only follow the category when the icon was its default.
-      icon: current.icon === previousDefault ? categoryById(categoryId).icon : current.icon
-    }));
   }
 
   async function handleFiles(event) {
@@ -103,9 +95,9 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, loadingAddre
         lng: pin.lng,
         placeId: pin.placeId || "",
         type: form.type,
-        category: form.category,
         icon: form.icon,
-        visitedAt: form.visitedAt,
+        // Visit dates only apply to memories.
+        visitedAt: form.type === "memory" ? form.visitedAt : "",
         memo: form.memo.trim(),
         photos,
         videoLinks
@@ -153,30 +145,31 @@ export default function PinEditor({ mapId, pinId, pin, isNew, user, loadingAddre
         <input value={form.address} onChange={(event) => update("address", event.target.value)} placeholder={loadingAddress ? "住所を取得中..." : "住所"} maxLength={200} />
       </label>
 
-      <div className="field-row">
-        <label className="field">
-          <span>カテゴリ</span>
-          <select value={form.category} onChange={(event) => changeCategory(event.target.value)}>
-            {CATEGORIES.map((category) => (
-              <option key={category.id} value={category.id}>{category.icon} {category.label}</option>
-            ))}
-          </select>
-        </label>
+      {form.type === "memory" && (
         <label className="field">
           <span>訪れた日</span>
           <input type="date" value={form.visitedAt} onChange={(event) => update("visitedAt", event.target.value)} />
         </label>
-      </div>
+      )}
 
       <div className="field">
-        <span>ピンのアイコン</span>
-        <div className="icon-picker">
-          {ICON_CHOICES.map((icon) => (
-            <button key={icon} type="button" className={form.icon === icon ? "active" : ""} onClick={() => update("icon", icon)} aria-label={`アイコン ${icon}`}>
-              {icon}
+        <span>カテゴリ（ピンのアイコン）</span>
+        <div className="category-picker" role="radiogroup" aria-label="カテゴリ">
+          {categoryOptions.map((category) => (
+            <button
+              key={category.icon}
+              type="button"
+              role="radio"
+              aria-checked={form.icon === category.icon}
+              className={form.icon === category.icon ? "active" : ""}
+              onClick={() => update("icon", category.icon)}
+            >
+              <span className="category-icon">{category.icon}</span>
+              <span>{category.label}</span>
             </button>
           ))}
         </div>
+        <small className="hint">カテゴリの追加・名前の変更は、メニューの歯車から行えます。</small>
       </div>
 
       <label className="field">

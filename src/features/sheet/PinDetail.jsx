@@ -1,10 +1,10 @@
 import { useState } from "react";
 import PhotoImage from "../pins/PhotoImage.jsx";
-import { PIN_TYPES, categoryById } from "../pins/categories.js";
+import { PIN_TYPES, categoryLabel, pinIcon } from "../pins/categories.js";
 
-export default function PinDetail({ pin, expanded, onEdit, onDelete }) {
+export default function PinDetail({ pin, categories, expanded, onEdit, onDelete }) {
   const [viewerIndex, setViewerIndex] = useState(null);
-  const category = categoryById(pin.category);
+  const icon = pinIcon(pin);
   const photos = pin.photos || [];
   const routeUrl = `https://www.google.com/maps/dir/?api=1&destination=${pin.lat},${pin.lng}` +
     (pin.placeId ? `&destination_place_id=${encodeURIComponent(pin.placeId)}` : "");
@@ -26,7 +26,7 @@ export default function PinDetail({ pin, expanded, onEdit, onDelete }) {
       )}
 
       <div className="pin-heading">
-        <span className="pin-heading-icon">{pin.icon || category.icon}</span>
+        <span className="pin-heading-icon">{icon}</span>
         <div>
           <h2>{pin.title}</h2>
           {pin.address && <p className="pin-address">📍 {pin.address}</p>}
@@ -35,8 +35,8 @@ export default function PinDetail({ pin, expanded, onEdit, onDelete }) {
 
       <div className="chip-row">
         <span className={`chip chip-${pin.type}`}>{PIN_TYPES[pin.type]?.label}</span>
-        <span className="chip">{category.label}</span>
-        {pin.visitedAt && <span className="chip">🗓 {pin.visitedAt.replaceAll("-", "/")}</span>}
+        <span className="chip">{icon} {categoryLabel(icon, categories)}</span>
+        {pin.type === "memory" && pin.visitedAt && <span className="chip">🗓 {pin.visitedAt.replaceAll("-", "/")}</span>}
         {photos.length > 0 && <span className="chip">📷 {photos.length}</span>}
       </div>
 

@@ -3,7 +3,7 @@ import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { GOOGLE_MAPS_API_KEY } from "../../config.js";
 import { deletePin, newPinId, subscribePins } from "../../firebase/pins.js";
 import { fetchPlaceDetails, reverseGeocode } from "../../lib/places.js";
-import { categoryFromPlaceTypes } from "../pins/categories.js";
+import { iconFromPlaceTypes, mapCategories } from "../pins/categories.js";
 import BottomSheet from "../sheet/BottomSheet.jsx";
 import PinDetail from "../sheet/PinDetail.jsx";
 import PinEditor from "../sheet/PinEditor.jsx";
@@ -47,6 +47,7 @@ function MapScreenInner({ map, user }) {
   const [focus, setFocus] = useState(null);
   const lastLongPressRef = useRef(0);
 
+  const categories = mapCategories(map);
   const geocodingLib = useMapsLibrary("geocoding");
   const placesLib = useMapsLibrary("places");
 
@@ -132,7 +133,14 @@ function MapScreenInner({ map, user }) {
     // Touch devices can fire both our long-press timer and a contextmenu event.
     if (Date.now() - lastLongPressRef.current < 800) return;
     lastLongPressRef.current = Date.now();
-    startDraft({ ...latLng, title: "", address: "", placeId: "", loading: Boolean(geocodingLib) });
+    startDraft({
+      ...latLng,
+      title: "",
+      address: "",
+      placeId: "",
+      icon: iconFromPlaceTypes([], categories),
+      loading: Boolean(geocodingLib)
+    });
     if (!geocodingLib) return;
     try {
       const { name, address } = await reverseGeocode(geocodingLib, latLng);
@@ -153,7 +161,7 @@ function MapScreenInner({ map, user }) {
         title: place.name,
         address: place.address,
         placeId,
-        category: categoryFromPlaceTypes(place.types).id
+        icon: iconFromPlaceTypes(place.types, categories)
       });
     } catch (error) {
       console.warn("Place details failed", error);
@@ -167,7 +175,7 @@ function MapScreenInner({ map, user }) {
       title: place.name,
       address: place.address,
       placeId: place.id,
-      category: categoryFromPlaceTypes(place.types).id
+      icon: iconFromPlaceTypes(place.types, categories)
     });
     setFocus({ lat: place.lat, lng: place.lng, zoom: 16, key: Date.now() });
   }
@@ -227,6 +235,7 @@ function MapScreenInner({ map, user }) {
               pin={draft}
               isNew
               user={user}
+              categories={categories}
               loadingAddress={draft.loading}
               onSaved={(pinId) => {
                 setDraft(null);
@@ -242,16 +251,17 @@ function MapScreenInner({ map, user }) {
               pinId={selectedPin.id}
               pin={selectedPin}
               user={user}
+              categories={categories}
               onSaved={() => setEditing(false)}
               onCancel={() => setEditing(false)}
             />
           ) : (
-            <PinDetail pin={selectedPin} expanded={expanded} onEdit={() => setEditing(true)} onDelete={() => handleDelete(selectedPin)} />
+            <PinDetail pin={selectedPin} categories={categories} expanded={expanded} onEdit={() => setEditing(true)} onDelete={() => handleDelete(selectedPin)} />
           )}
         </BottomSheet>
       )}
 
-      <Menu open={menuOpen} onClose={() => setMenuOpen(false)} map={map} user={user} pins={pins} onSelectPin={selectPin} />
+      <Menu open={menuOpen} onClose={() => setMenuOpen(false)} map={map} user={user} pins={pins} categories={categories} onSelectPin={selectPin} />
     </div>
   );
 }

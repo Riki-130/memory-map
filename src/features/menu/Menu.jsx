@@ -1,8 +1,9 @@
 import { useState } from "react";
 import PhotoImage from "../pins/PhotoImage.jsx";
-import { categoryById } from "../pins/categories.js";
+import { categoryLabel, pinIcon } from "../pins/categories.js";
 import { signOutUser } from "../auth/useAuth.js";
 import MembersPanel from "./MembersPanel.jsx";
+import CategoryEditor from "./CategoryEditor.jsx";
 
 const TABS = [
   { id: "album", label: "思い出アルバム" },
@@ -11,10 +12,11 @@ const TABS = [
 
 const charactersImage = `${import.meta.env.BASE_URL}images/couple-characters.png`;
 
-export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
+export default function Menu({ open, onClose, map, user, pins, categories, onSelectPin }) {
   const [tab, setTab] = useState("album");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newestFirst, setNewestFirst] = useState(true);
+  const [wishIcon, setWishIcon] = useState("all");
 
   const byTitle = (a, b) => a.title.localeCompare(b.title, "ja");
   // Undated memories always go last, whichever direction is chosen.
@@ -25,6 +27,10 @@ export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
   };
   const memories = pins.filter((pin) => pin.type === "memory").sort(byVisited);
   const wishes = pins.filter((pin) => pin.type === "wishlist").sort(byTitle);
+  // Filter buttons only for icons that are actually used on the wishlist.
+  const wishIcons = [...new Set(wishes.map(pinIcon))];
+  const activeWishIcon = wishIcons.includes(wishIcon) ? wishIcon : "all";
+  const visibleWishes = activeWishIcon === "all" ? wishes : wishes.filter((pin) => pinIcon(pin) === activeWishIcon);
 
   function close() {
     setSettingsOpen(false);
@@ -53,13 +59,14 @@ export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
           <div className="settings-view">
             <button className="text-button back-button" type="button" onClick={() => setSettingsOpen(false)}>‹ メニューに戻る</button>
             <div className="menu-content">
+              <CategoryEditor map={map} categories={categories} pins={pins} />
               <MembersPanel map={map} user={user} />
             </div>
             <button className="logout-button" type="button" onClick={signOutUser}>ログアウト</button>
           </div>
         ) : (
           <>
-            <nav className="menu-tabs">
+            <nav className="menu-tabs" aria-label="リストの切り替え">
               {TABS.map((item) => (
                 <button key={item.id} type="button" className={tab === item.id ? "active" : ""} onClick={() => setTab(item.id)}>
                   {item.label}
@@ -78,7 +85,7 @@ export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
                         ⇅ {newestFirst ? "日付が新しい順" : "日付が古い順"}
                       </button>
                     </div>
-                    <PinCards pins={memories} onSelectPin={onSelectPin} showDate />
+                    <PinCards pins={memories} categories={categories} onSelectPin={onSelectPin} showDate />
                   </>
                 )
               )}
@@ -87,7 +94,24 @@ export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
                 wishes.length === 0 ? (
                   <p className="empty">行ってみたい場所を追加すると、ここに並びます。</p>
                 ) : (
-                  <PinCards pins={wishes} onSelectPin={onSelectPin} />
+                  <>
+                    <div className="icon-filter" role="group" aria-label="カテゴリで絞り込み">
+                      <button type="button" className={activeWishIcon === "all" ? "active" : ""} onClick={() => setWishIcon("all")}>すべて</button>
+                      {wishIcons.map((icon) => (
+                        <button
+                          key={icon}
+                          type="button"
+                          className={activeWishIcon === icon ? "active" : ""}
+                          aria-label={categoryLabel(icon, categories)}
+                          title={categoryLabel(icon, categories)}
+                          onClick={() => setWishIcon(icon)}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                    <PinCards pins={visibleWishes} categories={categories} onSelectPin={onSelectPin} />
+                  </>
                 )
               )}
             </div>
@@ -99,7 +123,7 @@ export default function Menu({ open, onClose, map, user, pins, onSelectPin }) {
 }
 
 // Cover is the first photo when there is one, otherwise the pin's category icon.
-function PinCards({ pins, onSelectPin, showDate }) {
+function PinCards({ pins, categories, onSelectPin, showDate }) {
   return (
     <div className="album-grid">
       {pins.map((pin) => (
@@ -107,11 +131,11 @@ function PinCards({ pins, onSelectPin, showDate }) {
           {pin.photos?.[0] ? (
             <PhotoImage className="album-cover" path={pin.photos[0].thumbPath} />
           ) : (
-            <div className="album-cover album-cover-empty">{pin.icon || categoryById(pin.category).icon}</div>
+            <div className="album-cover album-cover-empty">{pinIcon(pin)}</div>
           )}
           <strong>{pin.title}</strong>
           <span>
-            {showDate ? (pin.visitedAt ? pin.visitedAt.replaceAll("-", "/") : "日付なし") : categoryById(pin.category).label}
+            {showDate ? (pin.visitedAt ? pin.visitedAt.replaceAll("-", "/") : "日付なし") : categoryLabel(pinIcon(pin), categories)}
             {pin.photos?.length ? ` · 📷${pin.photos.length}` : ""}
           </span>
         </button>

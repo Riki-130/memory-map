@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { AdvancedMarker, Map, useMap } from "@vis.gl/react-google-maps";
 import { DEFAULT_CENTER, GOOGLE_MAP_ID } from "../../config.js";
-import { categoryById } from "../pins/categories.js";
+import { pinIcon } from "../pins/categories.js";
 
 const LONG_PRESS_MS = 550;
 
@@ -53,7 +53,7 @@ export default function MapCanvas({ pins, draft, selectedPinId, focus, onSelectP
 }
 
 function PinMarker({ pin, selected, draft }) {
-  const icon = pin.icon || categoryById(pin.category).icon;
+  const icon = pinIcon(pin);
   return (
     <div className={`pin-marker pin-${pin.type}${selected ? " selected" : ""}${draft ? " draft" : ""}`}>
       <span>{icon}</span>
