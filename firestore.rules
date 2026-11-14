@@ -40,6 +40,23 @@ service cloud.firestore {
         && (!('videoLinks' in data) || (data.videoLinks is list && data.videoLinks.size() <= 20));
     }
 
+    function optionalYen(value) {
+      return value == null || (value is number && value >= 0 && value <= 1000000000000);
+    }
+
+    function validGoal(data) {
+      return data.keys().hasOnly(['year', 'text', 'done', 'doneAt', 'doneBy', 'order', 'pinId',
+          'amountTarget', 'amountCurrent', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.year is int && data.year >= 2026 && data.year <= 2100
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 100
+        && data.done is bool
+        && (data.doneAt == null || data.doneAt is timestamp)
+        && (data.doneBy == null || data.doneBy is string)
+        && data.order is number
+        && data.pinId is string && data.pinId.size() <= 64
+        && optionalYen(data.amountTarget) && optionalYen(data.amountCurrent);
+    }
+
     function validCategories(data) {
       return !('categories' in data) || (data.categories is list && data.categories.size() <= 40);
     }
@@ -68,6 +85,12 @@ service cloud.firestore {
       match /pins/{pinId} {
         allow read, delete: if isMember(mapId);
         allow create, update: if isMember(mapId) && validPin(request.resource.data);
+      }
+
+      // Yearly goals: shared by every member, like pins.
+      match /goals/{goalId} {
+        allow read, delete: if isMember(mapId);
+        allow create, update: if isMember(mapId) && validGoal(request.resource.data);
       }
 
       match /invites/{token} {

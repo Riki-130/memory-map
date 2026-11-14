@@ -23,6 +23,7 @@ import { INVITE_TTL_DAYS } from "../config.js";
 //   maps/{mapId}/invites/{token}     mapName, createdBy, ownerName, expiresAt, active
 //   maps/{mapId}/joinRequests/{uid}  profile + token of the invite that was used
 //   maps/{mapId}/pins/{pinId}        see pins.js
+//   maps/{mapId}/goals/{goalId}      see goals.js
 
 export function profileOf(user, role) {
   return {
