@@ -4,12 +4,15 @@ import { categoryLabel, pinIcon } from "../pins/categories.js";
 import { signOutUser } from "../auth/useAuth.js";
 import MembersPanel from "./MembersPanel.jsx";
 import CategoryEditor from "./CategoryEditor.jsx";
+import GoalsPanel from "./GoalsPanel.jsx";
 import PinDetail from "../sheet/PinDetail.jsx";
 import PinEditor from "../sheet/PinEditor.jsx";
 
+// Labels are split where they may wrap when three tabs don't fit on one line.
 const TABS = [
-  { id: "album", label: "思い出アルバム" },
-  { id: "wishlist", label: "行ってみたいリスト" }
+  { id: "album", label: ["思い出", "アルバム"] },
+  { id: "wishlist", label: ["行ってみたい", "リスト"] },
+  { id: "goals", label: ["ふたりの", "目標"] }
 ];
 
 const charactersImage = `${import.meta.env.BASE_URL}images/couple-characters.png`;
@@ -117,7 +120,7 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
             <nav className="menu-tabs" aria-label="リストの切り替え">
               {TABS.map((item) => (
                 <button key={item.id} type="button" className={tab === item.id ? "active" : ""} onClick={() => setTab(item.id)}>
-                  {item.label}
+                  {item.label[0]}<wbr />{item.label[1]}
                 </button>
               ))}
             </nav>
@@ -136,6 +139,10 @@ export default function Menu({ open, onClose, map, user, pins, categories, onSel
                     <PinCards pins={memories} categories={categories} onSelectPin={setViewingPinId} showDate />
                   </>
                 )
+              )}
+
+              {tab === "goals" && (
+                <GoalsPanel map={map} user={user} pins={pins} onGoToPin={goToPin} />
               )}
 
               {tab === "wishlist" && (
